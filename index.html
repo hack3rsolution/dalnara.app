@@ -3,1344 +3,1848 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>K-Saju — Korean Astrology for the World</title>
+<title>Dalnara — Learn Korean with AI</title>
+<meta name="description" content="AI-powered Korean learning tailored to your native language. Pronunciation coaching, K-Drama scenarios, and Korean culture in every lesson.">
+<link rel="canonical" href="https://dalnara.app">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;900&family=Noto+Serif+SC:wght@300;400;700;900&family=Noto+Serif+JP:wght@300;400;600;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Sans+KR:wght@300;400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --gold: #C9A84C;
-  --gold-light: #E8C97A;
-  --gold-dim: rgba(201,168,76,0.35);
-  --gold-faint: rgba(201,168,76,0.12);
-  --dark: #0E0C08;
-  --dark-2: #161410;
-  --dark-3: #1E1C16;
-  --dark-4: #262420;
-  --text: #F0E8D8;
-  --text-dim: rgba(240,232,216,0.6);
-  --text-faint: rgba(240,232,216,0.35);
-  --accent: #8B6B35;
+  --cream:    #FBF7F0;
+  --cream2:   #F3EDE2;
+  --ink:      #1C1A17;
+  --ink-soft: #4A453D;
+  --terracotta: #C85E3A;
+  --teal:     #2E7D6E;
+  --gold:     #C8922A;
+  --blush:    #E8B4A0;
+  --sky:      #6BAED6;
+  --radius:   20px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --font-ko: 'Noto Sans KR', sans-serif;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-
-html { scroll-behavior: smooth; }
-
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
 body {
-  background: var(--dark);
-  color: var(--text);
-  font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--ink);
   overflow-x: hidden;
+}
+
+/* ── JAMO BACKGROUND DECORATION ── */
+.jamo-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.jamo-char {
+  position: absolute;
+  font-family: var(--font-ko);
+  font-weight: 300;
+  color: var(--ink);
+  opacity: 0.028;
+  user-select: none;
+  animation: jamoFloat var(--dur, 20s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes jamoFloat {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50%       { transform: translateY(-18px) rotate(var(--rot2, 2deg)); }
+}
+
+/* ── LANGUAGE MODAL ── */
+.lang-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(28, 26, 23, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+.lang-overlay.open { opacity: 1; pointer-events: all; }
+.lang-modal {
+  background: var(--cream);
+  border-radius: 28px;
+  padding: 36px 32px;
+  max-width: 560px; width: 90%;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.18);
+  transform: translateY(16px) scale(.97);
+  transition: transform .25s;
   position: relative;
 }
-
-/* ── GRAIN OVERLAY ── */
-body::before {
-  content:'';
-  position: fixed;
-  inset:0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.5;
-  pointer-events: none;
-  z-index: 9999;
+.lang-overlay.open .lang-modal { transform: translateY(0) scale(1); }
+.lang-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
 }
-
-/* ── STAR CANVAS ── */
-#starfield {
-  position: fixed;
-  inset:0;
-  pointer-events: none;
-  z-index: 0;
+.lang-modal-title {
+  font-family: var(--font-display);
+  font-size: 22px; color: var(--ink);
 }
-
-/* ── LANGUAGE SWITCHER ── */
-.lang-bar {
-  position: fixed;
-  top:0; left:0; right:0;
-  z-index: 1000;
-  display:flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  padding: 12px 20px;
-  background: linear-gradient(to bottom, rgba(14,12,8,0.95) 0%, rgba(14,12,8,0) 100%);
-  backdrop-filter: blur(8px);
+.lang-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--cream2); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--ink-soft);
+  transition: background .2s;
 }
-
-.lang-btn {
-  background: none;
-  border: 1px solid transparent;
-  color: var(--text-faint);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-family: inherit;
+.lang-close:hover { background: var(--blush); }
+.lang-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
 }
-.lang-btn:hover { color: var(--gold-light); border-color: var(--gold-dim); }
-.lang-btn.active { color: var(--gold); border-color: var(--gold); background: var(--gold-faint); }
-
-/* ── SECTIONS ── */
-section {
-  position: relative;
-  z-index: 1;
+.lang-opt {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 10px 4px; border-radius: 12px;
+  background: none; border: 1.5px solid transparent;
+  cursor: pointer; transition: all .18s;
 }
+.lang-opt:hover { background: var(--cream2); border-color: var(--blush); }
+.lang-opt.active { background: #FEF0EA; border-color: var(--terracotta); }
+.lang-flag { font-size: 22px; }
+.lang-name { font-size: 10px; font-weight: 500; color: var(--ink-soft); text-align: center; line-height: 1.3; }
+.lang-opt.active .lang-name { color: var(--terracotta); font-weight: 600; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 0 40px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(251,247,240,0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(28,26,23,0.07);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 22px; color: var(--ink);
+  text-decoration: none; display: flex; align-items: center; gap: 8px;
+  letter-spacing: -0.3px;
+}
+.nav-logo-han {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--terracotta);
+  color: white; font-family: var(--font-ko); font-weight: 400;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+}
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.nav-links { display: flex; gap: 24px; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--ink-soft);
+  text-decoration: none; transition: color .2s;
+}
+.nav-links a:hover { color: var(--terracotta); }
+.nav-globe {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--cream2); border: 1.5px solid rgba(28,26,23,0.1);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; transition: all .2s; position: relative;
+}
+.nav-globe:hover { background: #FEF0EA; border-color: var(--terracotta); }
+.nav-globe .current-flag { font-size: 17px; }
+.nav-cta {
+  background: var(--terracotta); color: white;
+  padding: 10px 22px; border-radius: 50px;
+  text-decoration: none; font-size: 14px; font-weight: 600;
+  transition: all .2s;
+  box-shadow: 0 4px 14px rgba(200,94,58,0.3);
+}
+.nav-cta:hover { background: #B54E2E; transform: translateY(-1px); }
 
 /* ── HERO ── */
 .hero {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   text-align: center;
-  padding: 100px 24px 60px;
-  position: relative;
+  padding: 100px 40px 80px;
+  position: relative; z-index: 1;
 }
-
-.hero-emblem {
-  font-size: clamp(80px, 18vw, 180px);
-  line-height: 1;
-  color: var(--gold);
-  text-shadow: 0 0 80px rgba(201,168,76,0.4), 0 0 160px rgba(201,168,76,0.15);
-  animation: pulse 4s ease-in-out infinite;
-  font-family: 'Noto Serif KR', serif;
-  font-weight: 900;
-  margin-bottom: 24px;
-  display: block;
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white; border: 1.5px solid var(--blush);
+  color: var(--terracotta); font-size: 13px; font-weight: 600;
+  padding: 7px 16px; border-radius: 50px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(200,94,58,0.1);
 }
-
-@keyframes pulse {
-  0%,100% { text-shadow: 0 0 80px rgba(201,168,76,0.4), 0 0 160px rgba(201,168,76,0.15); }
-  50%      { text-shadow: 0 0 120px rgba(201,168,76,0.6), 0 0 240px rgba(201,168,76,0.25); }
+.hero-eyebrow-dot {
+  width: 7px; height: 7px; background: var(--terracotta);
+  border-radius: 50%; animation: blink 2s infinite;
 }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-.hero-app-name {
-  font-family: 'Cormorant Garamond', serif;
+.hero-han-big {
+  font-family: var(--font-ko);
+  font-size: clamp(90px,16vw,180px);
   font-weight: 300;
-  font-size: clamp(14px, 3vw, 18px);
-  letter-spacing: 0.5em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 16px;
+  color: var(--terracotta);
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -4px;
+  opacity: 0.9;
+  text-shadow: 4px 6px 0 rgba(200,94,58,0.12);
+  animation: heroHan 8s ease-in-out infinite;
 }
+@keyframes heroHan { 0%,100%{transform:scale(1)} 50%{transform:scale(1.015)} }
 
 .hero-title {
-  font-size: clamp(32px, 7vw, 72px);
-  font-weight: 300;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-size: clamp(32px,5vw,58px);
+  color: var(--ink); line-height: 1.18;
   margin-bottom: 20px;
-  max-width: 700px;
+  letter-spacing: -1px;
 }
+.hero-title em { font-style: italic; color: var(--teal); }
 
-.hero-title em {
-  font-style: italic;
-  color: var(--gold-light);
-}
-
-.hero-subtitle {
-  font-size: clamp(14px, 2.5vw, 19px);
-  color: var(--text-dim);
-  max-width: 560px;
-  line-height: 1.7;
+.hero-sub {
+  font-size: clamp(15px,1.8vw,18px);
+  color: var(--ink-soft);
+  max-width: 540px; line-height: 1.75;
   margin-bottom: 48px;
-  font-weight: 300;
 }
 
-.cta-group {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--gold);
-  color: var(--dark);
-  padding: 14px 32px;
-  border-radius: 2px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: all 0.3s;
-  font-family: 'Cormorant Garamond', serif;
-}
-.btn-primary:hover {
-  background: var(--gold-light);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(201,168,76,0.35);
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  color: var(--gold);
-  border: 1px solid var(--gold-dim);
-  padding: 14px 32px;
-  border-radius: 2px;
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: all 0.3s;
-  font-family: 'Cormorant Garamond', serif;
-}
-.btn-secondary:hover {
-  border-color: var(--gold);
-  background: var(--gold-faint);
-}
-
-.scroll-hint {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-faint);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  animation: bob 2.5s ease-in-out infinite;
-}
-.scroll-hint::after {
-  content:'';
-  width: 1px;
-  height: 40px;
-  background: linear-gradient(to bottom, var(--gold-dim), transparent);
-}
-
-@keyframes bob {
-  0%,100% { transform: translateX(-50%) translateY(0); }
-  50%      { transform: translateX(-50%) translateY(8px); }
-}
-
-/* ── DIVIDER ── */
-.divider {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 0 40px;
-  margin: 20px 0;
-}
-.divider::before,.divider::after {
-  content:'';
-  flex:1;
-  height:1px;
-  background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
-}
-.divider-icon {
-  color: var(--gold);
-  font-size: 20px;
-  opacity: 0.6;
-}
-
-/* ── WHAT IS SAJU ── */
-.what-saju {
-  padding: 100px 40px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.section-label {
-  font-size: 11px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 20px;
-  display: block;
-}
-
-.section-title {
-  font-size: clamp(28px, 5vw, 54px);
-  font-weight: 300;
-  line-height: 1.2;
-  margin-bottom: 60px;
-}
-
-.saju-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px 80px;
-  align-items: start;
-}
-
-.saju-pillar {
-  background: var(--dark-3);
-  border: 1px solid var(--gold-dim);
-  border-radius: 2px;
-  padding: 40px 36px;
-  position: relative;
-  overflow: hidden;
-}
-.saju-pillar::before {
-  content:'';
-  position: absolute;
-  top:0; left:0; right:0;
-  height:2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
-
-.saju-pillar-glyph {
-  font-size: 52px;
-  color: var(--gold);
+/* CTA STACK */
+.hero-cta-stack {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
   margin-bottom: 16px;
-  display: block;
-  font-family: 'Noto Serif KR', serif;
-  font-weight: 900;
-  line-height: 1;
+}
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.btn-ios {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--ink); color: white;
+  padding: 15px 28px; border-radius: 50px;
+  text-decoration: none; font-size: 15px; font-weight: 600;
+  transition: all .22s;
+  box-shadow: 0 6px 20px rgba(28,26,23,0.25);
+}
+.btn-ios:hover { background: #333; transform: translateY(-2px); }
+.btn-ios svg { flex-shrink: 0; }
+.btn-waitlist {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white; color: var(--ink);
+  border: 1.5px solid rgba(28,26,23,0.15);
+  padding: 15px 28px; border-radius: 50px;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all .22s;
+  position: relative;
+}
+.btn-waitlist:hover { border-color: var(--terracotta); color: var(--terracotta); }
+.btn-waitlist .play-icon { font-size: 18px; }
+
+/* Waitlist inline form */
+.waitlist-form {
+  display: flex; gap: 8px; align-items: center;
+  max-width: 420px; width: 100%;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.waitlist-form input {
+  flex: 1; padding: 14px 18px; border-radius: 50px;
+  border: 1.5px solid rgba(28,26,23,0.2);
+  background: white; font-size: 14px; color: var(--ink);
+  font-family: var(--font-body);
+  outline: none; transition: border-color .2s;
+}
+.waitlist-form input:focus { border-color: var(--teal); }
+.waitlist-form button {
+  padding: 14px 22px; border-radius: 50px;
+  background: var(--teal); color: white;
+  border: none; cursor: pointer; font-size: 14px; font-weight: 600;
+  font-family: var(--font-body); transition: all .2s; white-space: nowrap;
+}
+.waitlist-form button:hover { background: #256358; }
+.waitlist-success {
+  color: var(--teal); font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
 }
 
-.saju-pillar-label {
-  font-size: 10px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--gold-dim);
-  margin-bottom: 8px;
-  display: block;
+.hero-social-proof {
+  font-size: 13px; color: var(--ink-soft); opacity: .7;
+}
+.hero-social-proof strong { color: var(--terracotta); }
+
+/* ── SCROLL HINT ── */
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--ink-soft); font-size: 11px; opacity: .45;
+}
+.scroll-arrow {
+  width: 20px; height: 20px; border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  animation: bounce 2s infinite;
+}
+@keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(4px)} }
+
+/* ── SECTION BASE ── */
+.section { padding: 100px 40px; position: relative; z-index: 1; }
+.section-inner { max-width: 1080px; margin: 0 auto; }
+.section-tag {
+  display: inline-block;
+  font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--terracotta);
+  background: #FEF0EA; padding: 5px 14px; border-radius: 20px;
+  margin-bottom: 18px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px,4vw,44px); color: var(--ink);
+  line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.5px;
+}
+.section-title em { font-style: italic; color: var(--teal); }
+.section-sub {
+  font-size: 16px; color: var(--ink-soft); line-height: 1.75; max-width: 500px;
 }
 
-.saju-pillar-name {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: var(--gold-light);
+/* ── L1 SECTION ── */
+.l1-section { background: white; }
+.l1-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+.l1-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.l1-card {
+  background: var(--cream); border-radius: 16px; padding: 20px;
+  border: 1.5px solid transparent; transition: all .25s;
 }
-
-.saju-pillar-desc {
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--text-dim);
-  font-weight: 300;
-}
-
-.saju-intro-text {
-  font-size: clamp(16px, 2.5vw, 22px);
-  line-height: 1.8;
-  color: var(--text-dim);
-  font-weight: 300;
-  max-width: 580px;
-}
-
-.saju-intro-text strong {
-  color: var(--gold-light);
-  font-weight: 600;
-}
-
-/* ── VS WESTERN ── */
-.vs-section {
-  padding: 80px 40px;
-  background: var(--dark-2);
-  border-top: 1px solid rgba(201,168,76,0.08);
-  border-bottom: 1px solid rgba(201,168,76,0.08);
-}
-
-.vs-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.vs-table {
-  display: grid;
-  grid-template-columns: 1fr 80px 1fr;
-  gap: 0;
-  margin-top: 60px;
-  align-items: start;
-}
-
-.vs-col {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.vs-col-header {
-  padding: 24px 32px;
-  background: var(--dark-3);
-  border: 1px solid var(--gold-dim);
-  border-radius: 2px;
-  text-align: center;
-}
-
-.vs-col-header .flag { font-size: 28px; margin-bottom: 8px; display: block; }
-.vs-col-header .name { font-size: 20px; font-weight: 600; color: var(--gold-light); }
-.vs-col-header .subname { font-size: 12px; color: var(--text-faint); letter-spacing: 0.2em; }
-
-.vs-item {
-  padding: 20px 28px;
-  border: 1px solid rgba(201,168,76,0.15);
-  border-radius: 2px;
-  background: rgba(255,255,255,0.02);
-}
-
-.vs-item-label {
-  font-size: 10px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--gold-dim);
-  margin-bottom: 6px;
-}
-
-.vs-item-val {
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--text-dim);
-}
-
-.vs-mid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding-top: 72px;
-}
-
-.vs-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--gold-dim);
-}
-
-.vs-vs {
-  writing-mode: vertical-rl;
-  font-size: 10px;
-  letter-spacing: 0.4em;
-  color: var(--text-faint);
-  text-transform: uppercase;
+.l1-card:hover { border-color: var(--blush); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+.l1-flag { font-size: 30px; margin-bottom: 10px; }
+.l1-lang { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.l1-issue { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+.l1-badge {
+  display: inline-block; margin-top: 10px;
+  font-size: 10px; font-weight: 700;
+  background: #FEF0EA; color: var(--terracotta);
+  padding: 3px 10px; border-radius: 20px;
 }
 
 /* ── FEATURES ── */
-.features {
-  padding: 100px 40px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
+.features-section { background: var(--cream); }
 .features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-top: 60px;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-top: 56px;
+}
+.feat-card {
+  background: white; border-radius: 20px; padding: 28px;
+  border: 1.5px solid rgba(28,26,23,0.06);
+  transition: all .25s; position: relative; overflow: hidden;
+}
+.feat-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  background: var(--terracotta); transform: scaleX(0); transform-origin: left;
+  transition: transform .3s;
+}
+.feat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.08); }
+.feat-card:hover::after { transform: scaleX(1); }
+.feat-icon { font-size: 34px; margin-bottom: 18px; }
+.feat-name { font-family: var(--font-display); font-size: 19px; color: var(--ink); margin-bottom: 8px; }
+.feat-desc { font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; }
+.feat-badge {
+  display: inline-block; margin-top: 16px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  padding: 4px 12px; border-radius: 20px;
+}
+.feat-badge.premium { background: #FEF0EA; color: var(--terracotta); }
+.feat-badge.free    { background: #E8F4F1; color: var(--teal); }
+.feat-badge.addon   { background: #FFF8EC; color: var(--gold); }
+
+/* ── PRICING ── */
+.pricing-section { background: white; }
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-top: 56px; max-width: 860px;
+}
+.price-card {
+  background: var(--cream); border: 1.5px solid rgba(28,26,23,0.08);
+  border-radius: 24px; padding: 32px 24px;
+  text-align: center; position: relative;
+}
+.price-card.featured {
+  background: var(--terracotta); border-color: var(--terracotta);
+  color: white;
+}
+.price-card.featured .price-tier,
+.price-card.featured .price-feature { color: rgba(255,255,255,0.85); }
+.price-card.featured .price-amount { color: white; }
+.featured-pill {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: white;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 16px; border-radius: 20px; white-space: nowrap;
+}
+.price-tier { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; }
+.price-amount { font-family: var(--font-display); font-size: 48px; color: var(--ink); line-height: 1; }
+.price-amount sub { font-family: var(--font-body); font-size: 14px; color: var(--ink-soft); vertical-align: middle; }
+.price-save { font-size: 12px; color: var(--teal); font-weight: 600; margin: 8px 0 24px; min-height: 18px; }
+.price-card.featured .price-save { color: rgba(255,255,255,0.7); }
+.price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+.price-feature {
+  font-size: 13px; color: var(--ink-soft); padding: 7px 0;
+  border-bottom: 1px solid rgba(28,26,23,0.06);
+  display: flex; align-items: flex-start; gap: 9px;
+}
+.price-card.featured .price-feature { border-bottom-color: rgba(255,255,255,.15); }
+.chk { color: var(--teal); flex-shrink: 0; font-size: 13px; margin-top: 1px; }
+.price-card.featured .chk { color: rgba(255,255,255,.9); }
+.xmk { color: rgba(28,26,23,.2); flex-shrink: 0; }
+.price-btn {
+  display: block; text-align: center; border-radius: 50px;
+  padding: 13px; font-size: 14px; font-weight: 600;
+  text-decoration: none; transition: all .2s;
+  font-family: var(--font-body);
+  background: var(--ink); color: white; border: none; cursor: pointer; width: 100%;
+}
+.price-btn:hover { background: #333; }
+.price-card.featured .price-btn { background: white; color: var(--terracotta); }
+.price-card.featured .price-btn:hover { background: var(--cream2); }
+
+/* ── ADDONS ── */
+.addons-section { background: var(--cream2); }
+.addons-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 14px; margin-top: 56px;
+}
+.addon-card {
+  background: white; border-radius: 18px; padding: 24px;
+  border: 1.5px solid rgba(28,26,23,0.06);
+  display: flex; flex-direction: column;
+  transition: all .25s;
+}
+.addon-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.07); }
+.addon-icon { font-size: 30px; margin-bottom: 14px; }
+.addon-name { font-weight: 600; font-size: 15px; color: var(--ink); margin-bottom: 6px; }
+.addon-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.65; flex: 1; }
+.addon-price {
+  margin-top: 18px;
+  font-family: var(--font-display); font-size: 22px; color: var(--gold);
+}
+.addon-card.bundle {
+  background: linear-gradient(135deg, #FFF8EC, #FEF0EA);
+  border-color: rgba(200,146,42,0.25);
 }
 
-.feature-card {
-  background: var(--dark-3);
-  border: 1px solid rgba(201,168,76,0.12);
-  border-radius: 2px;
-  padding: 36px 28px;
-  transition: all 0.4s;
-  position: relative;
-  overflow: hidden;
+/* ── CTA FINAL ── */
+.cta-section { background: var(--ink); padding: 100px 40px; text-align: center; position: relative; overflow: hidden; z-index: 1; }
+.cta-bg-han {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-ko); font-size: 360px; font-weight: 300;
+  color: white; opacity: .025; pointer-events: none; user-select: none;
+  letter-spacing: -20px;
 }
-
-.feature-card::after {
-  content:'';
-  position:absolute;
-  bottom:0; left:0; right:0;
-  height:1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-  transform: scaleX(0);
-  transition: transform 0.4s;
+.cta-title {
+  font-family: var(--font-display); font-size: clamp(32px,5vw,52px);
+  color: white; line-height: 1.2; margin-bottom: 16px;
 }
-
-.feature-card:hover {
-  border-color: var(--gold-dim);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px var(--gold-faint);
+.cta-title em { font-style: italic; color: var(--blush); }
+.cta-sub { font-size: 17px; color: rgba(255,255,255,.6); margin-bottom: 48px; }
+.cta-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.btn-cta-ios {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: white; color: var(--ink);
+  padding: 16px 30px; border-radius: 50px;
+  text-decoration: none; font-size: 15px; font-weight: 700;
+  transition: all .22s; box-shadow: 0 8px 24px rgba(0,0,0,.3);
 }
-.feature-card:hover::after { transform: scaleX(1); }
-
-.feature-icon {
-  font-size: 40px;
-  margin-bottom: 16px;
-  display: block;
-  filter: drop-shadow(0 0 12px rgba(201,168,76,0.3));
+.btn-cta-ios:hover { transform: translateY(-2px); }
+.btn-cta-waitlist {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.1); color: white;
+  border: 1.5px solid rgba(255,255,255,.25);
+  padding: 16px 30px; border-radius: 50px;
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  transition: all .22s; font-family: var(--font-body);
 }
-
-.feature-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--gold-light);
-  margin-bottom: 12px;
-}
-
-.feature-desc {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text-dim);
-  font-weight: 300;
-}
-
-/* ── TESTIMONIAL ── */
-.testimonial-section {
-  padding: 80px 40px;
-  text-align: center;
-  background: var(--dark-2);
-  border-top: 1px solid rgba(201,168,76,0.08);
-}
-
-.testimonial-quote {
-  font-size: clamp(22px, 4vw, 42px);
-  font-style: italic;
-  font-weight: 300;
-  max-width: 800px;
-  margin: 0 auto 32px;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-.testimonial-source {
-  font-size: 13px;
-  letter-spacing: 0.2em;
-  color: var(--gold);
-  text-transform: uppercase;
-}
-
-/* ── APP STORE ── */
-.download {
-  padding: 100px 40px;
-  text-align: center;
-}
-
-.download-inner {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.store-badges {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 48px;
-}
-
-.store-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--dark-3);
-  border: 1px solid var(--gold-dim);
-  border-radius: 4px;
-  padding: 14px 28px;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.3s;
-  min-width: 180px;
-}
-.store-badge:hover {
-  background: var(--dark-4);
-  border-color: var(--gold);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-}
-.store-badge-icon { font-size: 28px; }
-.store-badge-text { text-align: left; }
-.store-badge-sub { font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; display: block; margin-bottom: 2px; }
-.store-badge-name { font-size: 16px; font-weight: 600; color: var(--gold-light); }
+.btn-cta-waitlist:hover { background: rgba(255,255,255,.18); }
 
 /* ── FOOTER ── */
 footer {
+  background: var(--cream); border-top: 1px solid rgba(28,26,23,0.08);
   padding: 40px;
-  border-top: 1px solid rgba(201,168,76,0.1);
+}
+.footer-inner {
+  max-width: 1080px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+}
+.footer-logo { font-family: var(--font-display); font-size: 20px; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+.footer-logo-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--terracotta); color: white; font-family: var(--font-ko); font-size: 15px; display: flex; align-items: center; justify-content: center; }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 13px; color: var(--ink-soft); text-decoration: none; transition: color .2s; }
+.footer-links a:hover { color: var(--terracotta); }
+.footer-copy { font-size: 12px; color: rgba(28,26,23,.35); }
+
+/* ── WAITLIST MODAL ── */
+.waitlist-modal-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(28,26,23,.5); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.waitlist-modal-overlay.open { opacity: 1; pointer-events: all; }
+.waitlist-modal {
+  background: var(--cream); border-radius: 28px;
+  padding: 40px; max-width: 460px; width: 90%;
+  box-shadow: 0 32px 80px rgba(0,0,0,.2);
+  transform: translateY(20px) scale(.96); transition: transform .25s;
   text-align: center;
-  color: var(--text-faint);
-  font-size: 13px;
-  letter-spacing: 0.05em;
 }
-
-footer a { color: var(--gold-dim); text-decoration: none; }
-footer a:hover { color: var(--gold); }
-
-/* ── LANGUAGE-SPECIFIC OVERRIDES ── */
-
-/* ── ZH: Bold, large, minimal ── */
-body.lang-zh {
-  --hero-glyph-size: clamp(100px, 22vw, 220px);
+.waitlist-modal-overlay.open .waitlist-modal { transform: none; }
+.waitlist-modal-icon { font-size: 48px; margin-bottom: 16px; }
+.waitlist-modal-title { font-family: var(--font-display); font-size: 26px; color: var(--ink); margin-bottom: 8px; }
+.waitlist-modal-sub { font-size: 15px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 28px; }
+.waitlist-modal-form { display: flex; flex-direction: column; gap: 10px; }
+.waitlist-modal-form input {
+  padding: 14px 18px; border-radius: 14px;
+  border: 1.5px solid rgba(28,26,23,.15);
+  background: white; font-size: 14px; color: var(--ink);
+  font-family: var(--font-body); outline: none; transition: border-color .2s;
 }
-body.lang-zh .hero-emblem { font-family: 'Noto Serif SC', serif; font-size: clamp(100px,22vw,220px); }
-body.lang-zh .hero-title { font-family: 'Noto Serif SC', serif; font-size: clamp(36px, 8vw, 82px); font-weight: 700; letter-spacing: 0.05em; }
-body.lang-zh .hero-subtitle { font-size: clamp(16px, 2.8vw, 20px); line-height: 1.9; max-width: 480px; }
-body.lang-zh .feature-desc { font-size: 15px; line-height: 1.9; }
-body.lang-zh .section-title { font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: clamp(30px, 6vw, 60px); }
-body.lang-zh .saju-intro-text { font-size: clamp(18px, 3vw, 26px); font-family: 'Noto Serif SC', serif; }
-body.lang-zh .saju-pillar-desc { font-size: 16px; }
-body.lang-zh .feature-title { font-size: 20px; font-family: 'Noto Serif SC', serif; }
-body.lang-zh .features-grid { gap: 32px; }
-body.lang-zh .feature-card { padding: 44px 36px; }
-body.lang-zh .vs-item-val { font-size: 17px; }
-body.lang-zh .testimonial-quote { font-size: clamp(26px, 5vw, 52px); font-family: 'Noto Serif SC', serif; font-weight: 700; font-style: normal; }
-
-/* ── JA: Small, dense, detailed ── */
-body.lang-ja .hero-emblem { font-family: 'Noto Serif JP', serif; }
-body.lang-ja .hero-title { font-family: 'Noto Serif JP', serif; font-size: clamp(22px, 4.5vw, 48px); font-weight: 400; line-height: 1.5; letter-spacing: 0.08em; }
-body.lang-ja .hero-subtitle { font-family: 'Noto Serif JP', serif; font-size: clamp(12px, 1.8vw, 15px); line-height: 2.2; max-width: 700px; color: var(--text-dim); }
-body.lang-ja .section-title { font-family: 'Noto Serif JP', serif; font-size: clamp(20px, 3.5vw, 40px); line-height: 1.6; }
-body.lang-ja .saju-intro-text { font-size: clamp(13px, 1.8vw, 16px); line-height: 2.2; font-family: 'Noto Serif JP', serif; }
-body.lang-ja .feature-desc { font-size: 12px; line-height: 2.0; }
-body.lang-ja .feature-title { font-size: 15px; font-family: 'Noto Serif JP', serif; letter-spacing: 0.1em; }
-body.lang-ja .features-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
-body.lang-ja .feature-card { padding: 28px 22px; }
-body.lang-ja .saju-pillar-desc { font-size: 13px; line-height: 2.0; }
-body.lang-ja .vs-item-val { font-size: 13px; line-height: 1.8; }
-body.lang-ja .testimonial-quote { font-size: clamp(16px, 2.8vw, 28px); font-family: 'Noto Serif JP', serif; font-weight: 300; }
-
-/* ── KO ── */
-body.lang-ko .hero-emblem { font-family: 'Noto Serif KR', serif; }
-body.lang-ko .hero-title { font-family: 'Noto Serif KR', serif; font-size: clamp(26px, 5.5vw, 58px); font-weight: 400; line-height: 1.35; letter-spacing: -0.02em; }
-body.lang-ko .hero-subtitle { font-family: 'Noto Serif KR', serif; font-size: clamp(14px, 2.2vw, 18px); }
-body.lang-ko .section-title { font-family: 'Noto Serif KR', serif; }
-body.lang-ko .saju-intro-text { font-family: 'Noto Serif KR', serif; }
-body.lang-ko .feature-title { font-family: 'Noto Serif KR', serif; }
-body.lang-ko .saju-pillar-name { font-family: 'Noto Serif KR', serif; }
-
-/* ── AR: RTL ── */
-body.lang-ar {
-  direction: rtl;
+.waitlist-modal-form input:focus { border-color: var(--teal); }
+.waitlist-modal-form button {
+  padding: 14px; border-radius: 50px;
+  background: var(--teal); color: white; border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: var(--font-body); transition: all .2s;
 }
-body.lang-ar .lang-bar { flex-direction: row-reverse; }
-body.lang-ar .hero-subtitle { font-size: clamp(14px, 2.5vw, 19px); letter-spacing: 0; line-height: 2.0; }
-body.lang-ar .section-label { letter-spacing: 0.1em; }
-body.lang-ar .feature-desc { font-size: 14px; line-height: 2.0; }
-
-/* ── ANIMATIONS ── */
-.fade-up {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+.waitlist-modal-form button:hover { background: #256358; }
+.waitlist-close-btn {
+  margin-top: 12px; background: none; border: none;
+  color: var(--ink-soft); font-size: 13px; cursor: pointer;
+  font-family: var(--font-body);
 }
-.fade-up.visible {
-  opacity: 1;
-  transform: translateY(0);
+.waitlist-done {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 20px 0;
 }
+.waitlist-done-icon { font-size: 52px; }
+.waitlist-done-msg { font-family: var(--font-display); font-size: 22px; color: var(--ink); }
+.waitlist-done-sub { font-size: 14px; color: var(--ink-soft); }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
-  .saju-grid { grid-template-columns: 1fr; gap: 24px; }
-  .vs-table { grid-template-columns: 1fr; gap: 24px; }
-  .vs-mid { display: none; }
-  .features-grid { grid-template-columns: 1fr; }
-  body.lang-ja .features-grid { grid-template-columns: 1fr; }
-  .what-saju, .features { padding: 60px 24px; }
-  .vs-section, .testimonial-section, .download { padding: 60px 24px; }
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .section { padding: 72px 24px; }
+  .l1-layout, .features-grid, .pricing-grid { grid-template-columns: 1fr; }
+  .l1-cards { grid-template-columns: 1fr 1fr; }
+  .addons-grid { grid-template-columns: 1fr 1fr; }
+  .hero { padding: 90px 24px 72px; }
+  .lang-grid { grid-template-columns: repeat(4, 1fr); }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+@media (max-width: 480px) {
+  .lang-grid { grid-template-columns: repeat(3, 1fr); }
+  .addons-grid { grid-template-columns: 1fr; }
+  .cta-btns { flex-direction: column; align-items: center; }
 }
 </style>
 </head>
-<body class="lang-en">
+<body>
 
-<canvas id="starfield"></canvas>
+<!-- JAMO BACKGROUND -->
+<div class="jamo-bg" id="jamoBg"></div>
 
-<!-- LANGUAGE SWITCHER -->
-<nav class="lang-bar" id="langBar">
-  <button class="lang-btn active" data-lang="en">EN</button>
-  <button class="lang-btn" data-lang="ko">한국어</button>
-  <button class="lang-btn" data-lang="zh">中文</button>
-  <button class="lang-btn" data-lang="ja">日本語</button>
-  <button class="lang-btn" data-lang="ar">العربية</button>
-  <button class="lang-btn" data-lang="fr">FR</button>
-  <button class="lang-btn" data-lang="de">DE</button>
-  <button class="lang-btn" data-lang="es">ES</button>
+<!-- LANGUAGE MODAL -->
+<div class="lang-overlay" id="langOverlay" role="dialog" aria-modal="true">
+  <div class="lang-modal">
+    <div class="lang-modal-header">
+      <div class="lang-modal-title" data-i18n="lang_select_title">Choose your language</div>
+      <button class="lang-close" id="langClose" aria-label="Close">✕</button>
+    </div>
+    <div class="lang-grid" id="langGrid"></div>
+  </div>
+</div>
+
+<!-- WAITLIST MODAL -->
+<div class="waitlist-modal-overlay" id="waitlistOverlay">
+  <div class="waitlist-modal" id="waitlistModal">
+    <div class="waitlist-modal-icon">🤖</div>
+    <div class="waitlist-modal-title" data-i18n="waitlist_title">Join the Android Waitlist</div>
+    <div class="waitlist-modal-sub" data-i18n="waitlist_sub">Google Play is coming soon. Be the first to know when Dalnara launches on Android.</div>
+    <div class="waitlist-modal-form" id="waitlistForm">
+      <input type="email" id="waitlistEmail" placeholder="your@email.com" data-i18n-placeholder="email_placeholder">
+      <button onclick="submitWaitlist()" data-i18n="waitlist_btn">Notify me</button>
+    </div>
+    <button class="waitlist-close-btn" onclick="closeWaitlist()" data-i18n="waitlist_cancel">Cancel</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">한</div>
+    Dalnara
+  </a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#features" data-i18n="nav_features">Features</a>
+      <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
+      <a href="/support.html" data-i18n="nav_support">Support</a>
+    </div>
+    <button class="nav-globe" id="globeBtn" title="Language / 언어">
+      <span class="current-flag" id="currentFlag">🌐</span>
+    </button>
+    <a href="https://apps.apple.com/app/dalnara" class="nav-cta" data-i18n="nav_cta">Download</a>
+  </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <span class="hero-emblem" id="heroEmblem">命</span>
-  <div class="hero-app-name" id="heroAppName">K · S A J U</div>
-  <h1 class="hero-title" id="heroTitle">
-    Your destiny, written<br><em>in the moment of birth</em>
-  </h1>
-  <p class="hero-subtitle" id="heroSubtitle">
-    Four Pillars of Destiny — the 3,000-year-old Korean art of reading fate from birth time — now available to the world in 15 languages.
-  </p>
-  <div class="cta-group">
-    <a href="#download" class="btn-primary" id="ctaPrimary">▸ Download Free</a>
-    <a href="#saju" class="btn-secondary" id="ctaLearn">What is Saju?</a>
+  <div class="hero-eyebrow">
+    <span class="hero-eyebrow-dot"></span>
+    <span data-i18n="hero_eyebrow">AI-Powered Korean · Now on iOS</span>
   </div>
-  <div class="scroll-hint" id="scrollHint">scroll</div>
-</section>
+  <div class="hero-han-big" id="heroHan">한</div>
+  <h1 class="hero-title" data-i18n="hero_title">Learn Korean the way<br><em>your mind already thinks</em></h1>
+  <p class="hero-sub" data-i18n="hero_sub">Dalnara adapts to your native language — giving you pronunciation coaching, K-Drama conversations, and Korean culture woven into every lesson.</p>
 
-<div class="divider"><span class="divider-icon">✦</span></div>
-
-<!-- WHAT IS SAJU -->
-<section class="what-saju fade-up" id="saju">
-  <span class="section-label" id="sajuLabel">Ancient Wisdom</span>
-  <h2 class="section-title" id="sajuTitle">What is 사주 (Saju)?</h2>
-
-  <div class="saju-grid">
-    <div class="saju-intro-text" id="sajuIntro">
-      <p style="margin-bottom:20px">
-        <strong>Saju (사주, 四柱)</strong> means "Four Pillars." At the exact moment you were born, the cosmos aligned — Year, Month, Day, and Hour each carry a Heavenly Stem and Earthly Branch, forming eight characters (팔자, Paljja) that map your entire life's journey.
-      </p>
-      <p style="margin-bottom:20px">
-        Unlike Western astrology focused on a single rising sun sign, Saju weaves <strong>five elemental forces</strong> — Wood, Fire, Earth, Metal, Water — through 60-year cycles, revealing not just personality but timing: when to act, when to wait, when fortune favors.
-      </p>
-      <p>
-        Practiced across Korea for millennia, Saju was the language of kings, generals, and matchmakers. Today, it's the daily guide of millions — and with <strong>K-Saju</strong>, it belongs to the world.
-      </p>
-    </div>
-
-    <div>
-      <div class="saju-pillar" style="margin-bottom:20px">
-        <span class="saju-pillar-glyph">年</span>
-        <span class="saju-pillar-label" id="p1label">1st Pillar</span>
-        <div class="saju-pillar-name" id="p1name">Year Pillar — Origin</div>
-        <p class="saju-pillar-desc" id="p1desc">Shaped by the year of birth. Reveals ancestral karma, social reputation, and early life destiny. Governed by the 12 zodiac animals.</p>
-      </div>
-      <div class="saju-pillar">
-        <span class="saju-pillar-glyph">月</span>
-        <span class="saju-pillar-label" id="p2label">2nd Pillar</span>
-        <div class="saju-pillar-name" id="p2name">Month Pillar — Growth</div>
-        <p class="saju-pillar-desc" id="p2desc">Born of the birth month. Governs parents, siblings, and career foundation — the pillars of mid-life ambition.</p>
-      </div>
-    </div>
-
-    <div>
-      <div class="saju-pillar" style="margin-bottom:20px">
-        <span class="saju-pillar-glyph">日</span>
-        <span class="saju-pillar-label" id="p3label">3rd Pillar</span>
-        <div class="saju-pillar-name" id="p3name">Day Pillar — Self</div>
-        <p class="saju-pillar-desc" id="p3desc">The most personal pillar. The Day Stem is your true self — your core nature, marriage energy, and inner world. This is who you truly are.</p>
-      </div>
-      <div class="saju-pillar">
-        <span class="saju-pillar-glyph">時</span>
-        <span class="saju-pillar-label" id="p4label">4th Pillar</span>
-        <div class="saju-pillar-name" id="p4name">Hour Pillar — Legacy</div>
-        <p class="saju-pillar-desc" id="p4desc">Cast by the birth hour. Illuminates children, later life, and the legacy you leave behind. The final chapter of your story.</p>
-      </div>
-    </div>
-
-    <div>
-      <div style="padding:36px; border:1px solid var(--gold-dim); background:var(--dark-3); border-radius:2px; position:relative; overflow:hidden;">
-        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);"></div>
-        <div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:16px;" id="ohaengLabel">The Five Elements · 오행</div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;">
-          <span style="color:#4CAF8A;font-size:24px;font-family:'Noto Serif KR',serif;font-weight:900;">木</span>
-          <span style="color:#E57373;font-size:24px;font-family:'Noto Serif KR',serif;font-weight:900;">火</span>
-          <span style="color:#C9A84C;font-size:24px;font-family:'Noto Serif KR',serif;font-weight:900;">土</span>
-          <span style="color:#9E9E9E;font-size:24px;font-family:'Noto Serif KR',serif;font-weight:900;">金</span>
-          <span style="color:#64B5F6;font-size:24px;font-family:'Noto Serif KR',serif;font-weight:900;">水</span>
-        </div>
-        <p style="font-size:14px;line-height:1.8;color:var(--text-dim);font-weight:300;" id="ohaengDesc">
-          Wood · Fire · Earth · Metal · Water. These five forces flow through every being and every moment. Balance them, and life flows. Imbalance invites friction — and opportunity.
-        </p>
-      </div>
+  <div class="hero-cta-stack">
+    <div class="cta-row">
+      <a href="https://apps.apple.com/app/dalnara" class="btn-ios">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <span data-i18n="btn_ios">App Store</span>
+      </a>
+      <button class="btn-waitlist" onclick="openWaitlist()">
+        <span class="play-icon">▶</span>
+        <span data-i18n="btn_android">Google Play — Notify me</span>
+      </button>
     </div>
   </div>
+  <div class="hero-social-proof" data-i18n="hero_proof">Free forever · <strong>15 languages</strong> supported · iOS 16+</div>
+  <div class="scroll-hint"><div class="scroll-arrow"></div></div>
 </section>
 
-<div class="divider"><span class="divider-icon">✦</span></div>
-
-<!-- VS WESTERN ASTROLOGY -->
-<section class="vs-section fade-up">
-  <div class="vs-inner">
-    <span class="section-label" id="vsLabel">East meets West</span>
-    <h2 class="section-title" id="vsTitle">Saju vs. Western Astrology</h2>
-
-    <div class="vs-table">
-      <div class="vs-col">
-        <div class="vs-col-header">
-          <span class="flag">☯</span>
-          <div class="name" id="saName">Korean Saju</div>
-          <div class="subname">사주 四柱</div>
-        </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs1lbl">Foundation</div>
-          <div class="vs-item-val" id="vs1ko">Year + Month + Day + <strong style="color:var(--gold-light)">Hour</strong> of birth — 8 characters total</div>
-        </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs2lbl">System</div>
-          <div class="vs-item-val" id="vs2ko">60-year Sexagenary Cycle (天干地支) based on the Chinese calendar</div>
-        </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs3lbl">Focus</div>
-          <div class="vs-item-val" id="vs3ko">Life cycles, fortune timing, relationships, and elemental balance</div>
-        </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs4lbl">Prediction Style</div>
-          <div class="vs-item-val" id="vs4ko">Dynamic — shifts over 10-year Major Luck Cycles (대운) and annual luck</div>
-        </div>
+<!-- L1 AWARE -->
+<section class="section l1-section">
+  <div class="section-inner">
+    <div class="l1-layout">
+      <div>
+        <div class="section-tag" data-i18n="l1_tag">Tailored to you</div>
+        <h2 class="section-title" data-i18n="l1_title">Your mother tongue<br>is your <em>secret weapon</em></h2>
+        <p class="section-sub" data-i18n="l1_sub">Most apps treat everyone the same. Dalnara detects your native language and adapts — targeting the exact sounds, patterns, and rhythms that trip up speakers of <em>your</em> language.</p>
       </div>
-
-      <div class="vs-mid">
-        <div class="vs-dot"></div>
-        <div class="vs-vs">VS</div>
-        <div class="vs-dot"></div>
-      </div>
-
-      <div class="vs-col">
-        <div class="vs-col-header">
-          <span class="flag">♈</span>
-          <div class="name" id="westName">Western Astrology</div>
-          <div class="subname">Zodiac · Horoscope</div>
+      <div class="l1-cards">
+        <div class="l1-card">
+          <div class="l1-flag">🇯🇵</div>
+          <div class="l1-lang" data-i18n="l1_ja">Japanese</div>
+          <div class="l1-issue" data-i18n="l1_ja_issue">ㄹ/ㅓ distinction, syllable-final consonants</div>
+          <span class="l1-badge" data-i18n="l1_ja_badge">Liquid sounds</span>
         </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs1lbl2">Foundation</div>
-          <div class="vs-item-val" id="vs1en">Sun sign (birth date) + Rising & Moon signs</div>
+        <div class="l1-card">
+          <div class="l1-flag">🇺🇸</div>
+          <div class="l1-lang" data-i18n="l1_en">English</div>
+          <div class="l1-issue" data-i18n="l1_en_issue">ㄲ/ㅃ/ㅉ tense stops, ㅡ vowel</div>
+          <span class="l1-badge" data-i18n="l1_en_badge">Tense consonants</span>
         </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs2lbl2">System</div>
-          <div class="vs-item-val" id="vs2en">Tropical zodiac, planetary positions based on solar year</div>
+        <div class="l1-card">
+          <div class="l1-flag">🇨🇳</div>
+          <div class="l1-lang" data-i18n="l1_zh">Chinese</div>
+          <div class="l1-issue" data-i18n="l1_zh_issue">받침 final consonants, pitch patterns</div>
+          <span class="l1-badge" data-i18n="l1_zh_badge">Syllable endings</span>
         </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs3lbl2">Focus</div>
-          <div class="vs-item-val" id="vs3en">Personality archetypes, psychological traits, compatibility</div>
-        </div>
-        <div class="vs-item">
-          <div class="vs-item-label" id="vs4lbl2">Prediction Style</div>
-          <div class="vs-item-val" id="vs4en">Transit-based — planets moving through natal chart positions</div>
+        <div class="l1-card">
+          <div class="l1-flag">🇻🇳</div>
+          <div class="l1-lang" data-i18n="l1_vi">Vietnamese</div>
+          <div class="l1-issue" data-i18n="l1_vi_issue">Vowel length, honorific registers</div>
+          <span class="l1-badge" data-i18n="l1_vi_badge">Register levels</span>
         </div>
       </div>
     </div>
   </div>
 </section>
-
-<div class="divider"><span class="divider-icon">✦</span></div>
 
 <!-- FEATURES -->
-<section class="features fade-up">
-  <span class="section-label" id="featuresLabel">Inside K-Saju</span>
-  <h2 class="section-title" id="featuresTitle">Everything your destiny needs</h2>
-
-  <div class="features-grid">
-    <div class="feature-card">
-      <span class="feature-icon">🔮</span>
-      <div class="feature-title" id="f1t">Daily Fortune</div>
-      <p class="feature-desc" id="f1d">Each morning, receive your daily Saju reading — elemental energy shifts, auspicious hours, and what the cosmos has planned. Powered by Claude AI for nuanced, personalized insights.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">💫</span>
-      <div class="feature-title" id="f2t">K-Personality</div>
-      <p class="feature-desc" id="f2d">A deep-dive into your core Saju archetype: Day Master element, strength/weakness, and how you move through the world — the most honest mirror you'll ever look into.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🌙</span>
-      <div class="feature-title" id="f3t">Auspicious Calendar</div>
-      <p class="feature-desc" id="f3d">Plan weddings, launches, surgeries, and big decisions on the most favorable days. Traditional 길일 (auspicious day) calculation meets modern calendar UI.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">❤️</span>
-      <div class="feature-title" id="f4t">Relationship Saju</div>
-      <p class="feature-desc" id="f4d">Add family, partners, and friends. Analyze compatibility across all four pillars — see where you harmonize, where you clash, and how to navigate the tension.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🪞</span>
-      <div class="feature-title" id="f5t">Face Insight (관상)</div>
-      <p class="feature-desc" id="f5d">Korean physiognomy (관상학) reads fortune in the face. Upload a photo and receive an AI-powered analysis of life indicators written in the features you were born with.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">💬</span>
-      <div class="feature-title" id="f6t">Ask More</div>
-      <p class="feature-desc" id="f6d">A conversational AI oracle fluent in Saju. Ask about career timing, marriage energy, or what a bad year really means — and receive answers grounded in your actual chart.</p>
+<section class="section features-section" id="features">
+  <div class="section-inner">
+    <div class="section-tag" data-i18n="feat_tag">What's inside</div>
+    <h2 class="section-title" data-i18n="feat_title">Korean as it's <em>actually lived</em></h2>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🎤</div>
+        <div class="feat-name" data-i18n="f1_name">AI Pronunciation Coach</div>
+        <div class="feat-desc" data-i18n="f1_desc">Phoneme-level analysis in real time. Your coach knows exactly which sounds your native language makes hard — and targets those first.</div>
+        <span class="feat-badge premium" data-i18n="tag_premium">Premium</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎭</div>
+        <div class="feat-name" data-i18n="f2_name">K-Drama Scenarios</div>
+        <div class="feat-desc" data-i18n="f2_desc">Role-play real drama scenes. Learn 반말 and 존댓말 in context — the way Koreans actually pick them up.</div>
+        <span class="feat-badge free" data-i18n="tag_free3">Free · 3 scenes</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🧠</div>
+        <div class="feat-name" data-i18n="f3_name">Long-term AI Memory</div>
+        <div class="feat-desc" data-i18n="f3_desc">Your tutor remembers every session — weak vocabulary, pronunciation gaps, and what excites you. Each lesson is smarter than the last.</div>
+        <span class="feat-badge premium" data-i18n="tag_premium">Premium</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🃏</div>
+        <div class="feat-name" data-i18n="f4_name">SRS Flashcards</div>
+        <div class="feat-desc" data-i18n="f4_desc">Spaced repetition tuned to your recall curve. Words reappear at the moment before you'd forget them.</div>
+        <span class="feat-badge free" data-i18n="tag_free">Free</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎵</div>
+        <div class="feat-name" data-i18n="f5_name">K-Pop Listening</div>
+        <div class="feat-desc" data-i18n="f5_desc">Dictation mode, lyric drills, and pronunciation feedback — all tied to songs you already love.</div>
+        <span class="feat-badge addon" data-i18n="tag_addon">Add-on</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📝</div>
+        <div class="feat-name" data-i18n="f6_name">TOPIK Prep</div>
+        <div class="feat-desc" data-i18n="f6_desc">Full TOPIK I & II practice sets with detailed weakness analysis. Know exactly where to focus next.</div>
+        <span class="feat-badge addon" data-i18n="tag_addon">Add-on</span>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="divider"><span class="divider-icon">✦</span></div>
-
-<!-- TESTIMONIAL -->
-<section class="testimonial-section fade-up">
-  <p class="testimonial-quote" id="testimonialText">
-    "Your birth moment is not an accident — it is your signature in the fabric of time."
-  </p>
-  <div class="testimonial-source" id="testimonialSrc">Korean Proverb · 사람은 날 때부터 팔자가 있다</div>
+<!-- PRICING -->
+<section class="section pricing-section" id="pricing">
+  <div class="section-inner">
+    <div class="section-tag" data-i18n="price_tag">Pricing</div>
+    <h2 class="section-title" data-i18n="price_title">Start free.<br><em>Grow without limits.</em></h2>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier" data-i18n="tier_free">Free</div>
+        <div class="price-amount">$0</div>
+        <div class="price-save">&nbsp;</div>
+        <ul class="price-features">
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pf1">Hangul Master — complete</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pf2">1 lesson per day</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pf3">AI chat · 3 sessions/day</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pf4">Basic pronunciation feedback</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pf5">Weekly K-Expression</span></li>
+          <li class="price-feature"><span class="xmk">✗</span><span data-i18n="pf6">Native-language coaching</span></li>
+          <li class="price-feature"><span class="xmk">✗</span><span data-i18n="pf7">Unlimited AI chat</span></li>
+          <li class="price-feature"><span class="xmk">✗</span><span data-i18n="pf8">TOPIK mode</span></li>
+        </ul>
+        <a href="https://apps.apple.com/app/dalnara" class="price-btn" data-i18n="btn_free">Start free</a>
+      </div>
+      <div class="price-card featured">
+        <span class="featured-pill" data-i18n="pill_popular">Most Popular</span>
+        <div class="price-tier" data-i18n="tier_monthly">Premium / month</div>
+        <div class="price-amount">$9<sub>.99/mo</sub></div>
+        <div class="price-save">&nbsp;</div>
+        <ul class="price-features">
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm1">Everything in Free</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm2">L1-aware pronunciation AI</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm3">Unlimited AI conversation</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm4">All roleplay scenarios</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm5">AI writing coach</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm6">Advanced SRS</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm7">AI tutor memory</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pm8">Community access</span></li>
+        </ul>
+        <a href="https://apps.apple.com/app/dalnara" class="price-btn" data-i18n="btn_premium">Start Premium</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier" data-i18n="tier_annual">Annual</div>
+        <div class="price-amount">$59<sub>.99/yr</sub></div>
+        <div class="price-save" data-i18n="annual_save">Save 50% — $5/month</div>
+        <ul class="price-features">
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pa1">Everything in Premium</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pa2">Priority community matching</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pa3">Progress report PDF</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pa4">Offline learning mode</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pa5">Early access to new features</span></li>
+          <li class="price-feature"><span class="chk">✓</span><span data-i18n="pa6">Ad-free forever</span></li>
+          <li>&nbsp;</li><li>&nbsp;</li>
+        </ul>
+        <a href="https://apps.apple.com/app/dalnara" class="price-btn" data-i18n="btn_annual">Best value</a>
+      </div>
+    </div>
+  </div>
 </section>
 
-<div class="divider"><span class="divider-icon">✦</span></div>
-
-<!-- DOWNLOAD -->
-<section class="download fade-up" id="download">
-  <div class="download-inner">
-    <span class="section-label" id="dlLabel">Begin Your Reading</span>
-    <h2 class="section-title" id="dlTitle">Download K-Saju</h2>
-    <p style="font-size:17px;line-height:1.7;color:var(--text-dim);font-weight:300;margin-bottom:0;" id="dlSubtitle">
-      Free to start. Available in 15 languages. Your chart has been waiting for you.
-    </p>
-    <div class="store-badges">
-      <a href="#" class="store-badge">
-        <span class="store-badge-icon">🍎</span>
-        <div class="store-badge-text">
-          <span class="store-badge-sub" id="iosSub">Download on the</span>
-          <span class="store-badge-name">App Store</span>
-        </div>
-      </a>
-      <a href="#" class="store-badge">
-        <span class="store-badge-icon">🤖</span>
-        <div class="store-badge-text">
-          <span class="store-badge-sub" id="androidSub">Get it on</span>
-          <span class="store-badge-name">Google Play</span>
-        </div>
-      </a>
+<!-- ADDONS -->
+<section class="section addons-section">
+  <div class="section-inner">
+    <div class="section-tag" data-i18n="addon_tag">Add-ons · One-time purchase</div>
+    <h2 class="section-title" data-i18n="addon_title">Go deeper into <em>what you love</em></h2>
+    <p class="section-sub" data-i18n="addon_sub">Buy once, keep forever. Works with Free and Premium.</p>
+    <div class="addons-grid">
+      <div class="addon-card">
+        <div class="addon-icon">🎤</div>
+        <div class="addon-name" data-i18n="a1_name">Pronunciation Clinic</div>
+        <div class="addon-desc" data-i18n="a1_desc">30-day intensive targeting your specific phoneme weaknesses by native language.</div>
+        <div class="addon-price">$4.99</div>
+      </div>
+      <div class="addon-card">
+        <div class="addon-icon">🎭</div>
+        <div class="addon-name" data-i18n="a2_name">K-Drama Pack</div>
+        <div class="addon-desc" data-i18n="a2_desc">Full scenario library with branching dialogue and honorific coaching.</div>
+        <div class="addon-price">$3.99</div>
+      </div>
+      <div class="addon-card">
+        <div class="addon-icon">📋</div>
+        <div class="addon-name" data-i18n="a3_name">TOPIK Mock Exams</div>
+        <div class="addon-desc" data-i18n="a3_desc">Complete TOPIK I & II practice sets with weakness tracking and study plans.</div>
+        <div class="addon-price">$6.99</div>
+      </div>
+      <div class="addon-card">
+        <div class="addon-icon">💼</div>
+        <div class="addon-name" data-i18n="a4_name">Business Korean</div>
+        <div class="addon-desc" data-i18n="a4_desc">Workplace scenarios, email templates, and business honorific mastery.</div>
+        <div class="addon-price">$9.99</div>
+      </div>
+      <div class="addon-card">
+        <div class="addon-icon">🎵</div>
+        <div class="addon-name" data-i18n="a5_name">K-Pop Listening</div>
+        <div class="addon-desc" data-i18n="a5_desc">Lyric-based listening with dictation mode and pronunciation drills.</div>
+        <div class="addon-price">$2.99</div>
+      </div>
+      <div class="addon-card bundle">
+        <div class="addon-icon">✨</div>
+        <div class="addon-name" data-i18n="a6_name">Starter Bundle</div>
+        <div class="addon-desc" data-i18n="a6_desc">Pronunciation Clinic + K-Drama Pack + K-Pop Listening. Save vs buying separately.</div>
+        <div class="addon-price">$14.99 <span style="font-size:13px;color:var(--ink-soft);text-decoration:line-through;font-family:var(--font-body)">$11.97</span></div>
+      </div>
     </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg-han">한글</div>
+  <div class="cta-title" data-i18n="cta_title">Your Korean story<br><em>starts tonight</em></div>
+  <p class="cta-sub" data-i18n="cta_sub">Free forever · No credit card · Start Hangul in 5 minutes</p>
+  <div class="cta-btns">
+    <a href="https://apps.apple.com/app/dalnara" class="btn-cta-ios">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      <span data-i18n="cta_btn_ios">Download on App Store</span>
+    </a>
+    <button class="btn-cta-waitlist" onclick="openWaitlist()">
+      <span data-i18n="cta_btn_android">Android — Join Waitlist</span>
+    </button>
   </div>
 </section>
 
 <footer>
-  <p style="margin-bottom:12px;">
-    <span style="color:var(--gold);font-size:18px;font-family:'Noto Serif KR',serif;font-weight:900;">命</span>
-    <span style="margin-left:8px;letter-spacing:0.2em;font-size:13px;">K-SAJU</span>
-  </p>
-  <p style="margin-bottom:8px;">
-    <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
-    <a href="#">Terms</a> &nbsp;·&nbsp;
-    <a href="#">Contact</a>
-  </p>
-  <p style="font-size:11px;opacity:0.4;">© 2025 Pie Nest Inc. · All rights reserved</p>
+  <div class="footer-inner">
+    <a href="/" class="footer-logo">
+      <div class="footer-logo-mark">한</div>
+      Dalnara
+    </a>
+    <div class="footer-links">
+      <a href="/privacy.html" data-i18n="footer_privacy">Privacy</a>
+      <a href="/terms.html" data-i18n="footer_terms">Terms</a>
+      <a href="/support.html" data-i18n="footer_support">Support</a>
+    </div>
+    <div class="footer-copy">© 2026 Pie Nest Inc.</div>
+  </div>
 </footer>
 
 <script>
-/* ── STARFIELD ── */
-(function(){
-  const canvas = document.getElementById('starfield');
-  const ctx = canvas.getContext('2d');
-  let stars = [];
-  function resize(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  function init(){
-    stars = [];
-    for(let i=0;i<180;i++){
-      stars.push({
-        x: Math.random()*canvas.width,
-        y: Math.random()*canvas.height,
-        r: Math.random()*1.2+0.2,
-        a: Math.random(),
-        speed: Math.random()*0.4+0.1,
-        phase: Math.random()*Math.PI*2
-      });
-    }
-  }
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    const t = Date.now()/1000;
-    stars.forEach(s=>{
-      const alpha = (Math.sin(t*s.speed+s.phase)*0.4+0.6)*0.6;
-      ctx.beginPath();
-      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle = `rgba(201,168,76,${alpha*0.5})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  resize();
-  init();
-  draw();
-  window.addEventListener('resize',()=>{resize();init();});
-})();
+// ── LANGUAGES ─────────────────────────────────────────────────────────────────
+const LANGS = [
+  {code:'en',   flag:'🇺🇸', name:'English'},
+  {code:'ko',   flag:'🇰🇷', name:'한국어'},
+  {code:'ja',   flag:'🇯🇵', name:'日本語'},
+  {code:'zh',   flag:'🇨🇳', name:'中文'},
+  {code:'zh-TW',flag:'🇹🇼', name:'繁體中文'},
+  {code:'vi',   flag:'🇻🇳', name:'Tiếng Việt'},
+  {code:'es',   flag:'🇪🇸', name:'Español'},
+  {code:'fr',   flag:'🇫🇷', name:'Français'},
+  {code:'de',   flag:'🇩🇪', name:'Deutsch'},
+  {code:'pt',   flag:'🇧🇷', name:'Português'},
+  {code:'it',   flag:'🇮🇹', name:'Italiano'},
+  {code:'th',   flag:'🇹🇭', name:'ภาษาไทย'},
+  {code:'id',   flag:'🇮🇩', name:'Indonesia'},
+  {code:'ms',   flag:'🇲🇾', name:'Melayu'},
+  {code:'ar',   flag:'🇸🇦', name:'العربية'},
+  {code:'hi',   flag:'🇮🇳', name:'हिन्दी'},
+  {code:'bn',   flag:'🇧🇩', name:'বাংলা'},
+  {code:'tr',   flag:'🇹🇷', name:'Türkçe'},
+  {code:'ru',   flag:'🇷🇺', name:'Русский'},
+  {code:'pl',   flag:'🇵🇱', name:'Polski'},
+  {code:'nl',   flag:'🇳🇱', name:'Nederlands'},
+  {code:'sv',   flag:'🇸🇪', name:'Svenska'},
+  {code:'uk',   flag:'🇺🇦', name:'Українська'},
+  {code:'ro',   flag:'🇷🇴', name:'Română'},
+  {code:'cs',   flag:'🇨🇿', name:'Čeština'},
+];
 
-/* ── SCROLL FADE ── */
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
-},{threshold:0.1});
-document.querySelectorAll('.fade-up').forEach(el=>observer.observe(el));
-
-/* ── TRANSLATIONS ── */
+// ── COMPLETE TRANSLATIONS (all 25 languages, all keys) ───────────────────────
 const T = {
-  en: {
-    heroAppName: 'K · S A J U',
-    heroTitle: 'Your destiny, written<br><em>in the moment of birth</em>',
-    heroSubtitle: 'Four Pillars of Destiny — the 3,000-year-old Korean art of reading fate from birth time — now available to the world in 15 languages.',
-    ctaPrimary: '▸ Download Free',
-    ctaLearn: 'What is Saju?',
-    sajuLabel: 'Ancient Wisdom',
-    sajuTitle: 'What is 사주 (Saju)?',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>Saju (사주, 四柱)</strong> means "Four Pillars." At the exact moment you were born, the cosmos aligned — Year, Month, Day, and Hour each carry a Heavenly Stem and Earthly Branch, forming eight characters (팔자, Paljja) that map your entire life's journey.</p><p style="margin-bottom:20px">Unlike Western astrology focused on a single rising sun sign, Saju weaves <strong>five elemental forces</strong> — Wood, Fire, Earth, Metal, Water — through 60-year cycles, revealing not just personality but timing: when to act, when to wait, when fortune favors.</p><p>Practiced across Korea for millennia, Saju was the language of kings, generals, and matchmakers. Today, it's the daily guide of millions — and with <strong>K-Saju</strong>, it belongs to the world.</p>`,
-    p1label:'1st Pillar', p1name:'Year Pillar — Origin', p1desc:'Shaped by the year of birth. Reveals ancestral karma, social reputation, and early life destiny. Governed by the 12 zodiac animals.',
-    p2label:'2nd Pillar', p2name:'Month Pillar — Growth', p2desc:"Born of the birth month. Governs parents, siblings, and career foundation — the pillars of mid-life ambition.",
-    p3label:'3rd Pillar', p3name:'Day Pillar — Self', p3desc:'The most personal pillar. The Day Stem is your true self — your core nature, marriage energy, and inner world. This is who you truly are.',
-    p4label:'4th Pillar', p4name:'Hour Pillar — Legacy', p4desc:'Cast by the birth hour. Illuminates children, later life, and the legacy you leave behind. The final chapter of your story.',
-    ohaengLabel:'The Five Elements · 오행',
-    ohaengDesc:'Wood · Fire · Earth · Metal · Water. These five forces flow through every being and every moment. Balance them, and life flows. Imbalance invites friction — and opportunity.',
-    vsLabel:'East meets West', vsTitle:'Saju vs. Western Astrology',
-    saName:'Korean Saju', westName:'Western Astrology',
-    vs1lbl:'Foundation', vs1ko:'Year + Month + Day + <strong style="color:var(--gold-light)">Hour</strong> of birth — 8 characters total',
-    vs1en:'Sun sign (birth date) + Rising & Moon signs',
-    vs2lbl:'System', vs2ko:'60-year Sexagenary Cycle (天干地支) based on the Chinese calendar',
-    vs2en:'Tropical zodiac, planetary positions based on solar year',
-    vs3lbl:'Focus', vs3ko:'Life cycles, fortune timing, relationships, and elemental balance',
-    vs3en:'Personality archetypes, psychological traits, compatibility',
-    vs4lbl:'Prediction Style', vs4ko:'Dynamic — shifts over 10-year Major Luck Cycles (대운) and annual luck',
-    vs4en:'Transit-based — planets moving through natal chart positions',
-    featuresLabel:'Inside K-Saju', featuresTitle:'Everything your destiny needs',
-    f1t:'Daily Fortune', f1d:'Each morning, receive your daily Saju reading — elemental energy shifts, auspicious hours, and what the cosmos has planned. Powered by Claude AI for nuanced, personalized insights.',
-    f2t:'K-Personality', f2d:'A deep-dive into your core Saju archetype: Day Master element, strength/weakness, and how you move through the world — the most honest mirror you\'ll ever look into.',
-    f3t:'Auspicious Calendar', f3d:'Plan weddings, launches, surgeries, and big decisions on the most favorable days. Traditional 길일 (auspicious day) calculation meets modern calendar UI.',
-    f4t:'Relationship Saju', f4d:'Add family, partners, and friends. Analyze compatibility across all four pillars — see where you harmonize, where you clash, and how to navigate the tension.',
-    f5t:'Face Insight (관상)', f5d:'Korean physiognomy (관상학) reads fortune in the face. Upload a photo and receive an AI-powered analysis of life indicators written in the features you were born with.',
-    f6t:'Ask More', f6d:'A conversational AI oracle fluent in Saju. Ask about career timing, marriage energy, or what a bad year really means — and receive answers grounded in your actual chart.',
-    testimonialText:'"Your birth moment is not an accident — it is your signature in the fabric of time."',
-    testimonialSrc:'Korean Proverb · 사람은 날 때부터 팔자가 있다',
-    dlLabel:'Begin Your Reading', dlTitle:'Download K-Saju',
-    dlSubtitle:'Free to start. Available in 15 languages. Your chart has been waiting for you.',
-    iosSub:'Download on the', androidSub:'Get it on',
-    scrollHint:'scroll',
+  en:{
+    lang_select_title:'Choose your language',
+    nav_features:'Features', nav_pricing:'Pricing', nav_support:'Support', nav_cta:'Download',
+    hero_eyebrow:'AI-Powered Korean · Now on iOS',
+    hero_title:'Learn Korean the way<br><em>your mind already thinks</em>',
+    hero_sub:'Dalnara adapts to your native language — giving you pronunciation coaching, K-Drama conversations, and Korean culture woven into every lesson.',
+    btn_ios:'App Store', btn_android:'Google Play — Notify me',
+    hero_proof:'Free forever · 15 languages supported · iOS 16+',
+    l1_tag:'Tailored to you',
+    l1_title:'Your mother tongue<br>is your <em>secret weapon</em>',
+    l1_sub:'Most apps treat everyone the same. Dalnara detects your native language and targets the exact sounds and patterns that trip up speakers of your language.',
+    l1_ja:'Japanese', l1_en:'English', l1_zh:'Chinese', l1_vi:'Vietnamese',
+    l1_ja_issue:'ㄹ/ㅓ distinction, syllable-final consonants', l1_ja_badge:'Liquid sounds',
+    l1_en_issue:'ㄲ/ㅃ/ㅉ tense stops, ㅡ vowel', l1_en_badge:'Tense consonants',
+    l1_zh_issue:'받침 final consonants, pitch patterns', l1_zh_badge:'Syllable endings',
+    l1_vi_issue:'Vowel length, honorific registers', l1_vi_badge:'Register levels',
+    feat_tag:"What's inside", feat_title:'Korean as it\'s <em>actually lived</em>',
+    f1_name:'AI Pronunciation Coach', f1_desc:'Phoneme-level analysis in real time. Your coach knows which sounds your native language makes hard — and targets those first.',
+    f2_name:'K-Drama Scenarios', f2_desc:'Role-play real drama scenes. Learn 반말 and 존댓말 in context — the way Koreans actually pick them up.',
+    f3_name:'Long-term AI Memory', f3_desc:'Your tutor remembers every session — weak vocabulary, pronunciation gaps, and what excites you. Each lesson is smarter than the last.',
+    f4_name:'SRS Flashcards', f4_desc:'Spaced repetition tuned to your recall curve. Words reappear at the moment before you\'d forget them.',
+    f5_name:'K-Pop Listening', f5_desc:'Dictation mode, lyric drills, and pronunciation feedback — all tied to songs you already love.',
+    f6_name:'TOPIK Prep', f6_desc:'Full TOPIK I & II practice sets with detailed weakness analysis. Know exactly where to focus next.',
+    tag_premium:'Premium', tag_free3:'Free · 3 scenes', tag_free:'Free', tag_addon:'Add-on',
+    price_tag:'Pricing', price_title:'Start free.<br><em>Grow without limits.</em>',
+    tier_free:'Free', tier_monthly:'Premium / month', tier_annual:'Annual',
+    pf1:'Hangul Master — complete', pf2:'1 lesson per day', pf3:'AI chat · 3 sessions/day',
+    pf4:'Basic pronunciation feedback', pf5:'Weekly K-Expression',
+    pf6:'Native-language coaching', pf7:'Unlimited AI chat', pf8:'TOPIK mode',
+    pm1:'Everything in Free', pm2:'L1-aware pronunciation AI', pm3:'Unlimited AI conversation',
+    pm4:'All roleplay scenarios', pm5:'AI writing coach', pm6:'Advanced SRS',
+    pm7:'AI tutor memory', pm8:'Community access',
+    pa1:'Everything in Premium', pa2:'Priority community matching', pa3:'Progress report PDF',
+    pa4:'Offline learning mode', pa5:'Early access to new features', pa6:'Ad-free forever',
+    annual_save:'Save 50% — $5/month', pill_popular:'Most Popular',
+    btn_free:'Start free', btn_premium:'Start Premium', btn_annual:'Best value',
+    addon_tag:'Add-ons · One-time purchase', addon_title:'Go deeper into <em>what you love</em>',
+    addon_sub:'Buy once, keep forever. Works with Free and Premium.',
+    a1_name:'Pronunciation Clinic', a1_desc:'30-day intensive targeting your specific phoneme weaknesses.',
+    a2_name:'K-Drama Pack', a2_desc:'Full scenario library with branching dialogue and honorific coaching.',
+    a3_name:'TOPIK Mock Exams', a3_desc:'Complete TOPIK I & II practice sets with weakness tracking.',
+    a4_name:'Business Korean', a4_desc:'Workplace scenarios, email templates, and business honorifics.',
+    a5_name:'K-Pop Listening', a5_desc:'Lyric-based listening with dictation mode and pronunciation drills.',
+    a6_name:'Starter Bundle', a6_desc:'Pronunciation Clinic + K-Drama Pack + K-Pop Listening.',
+    cta_title:'Your Korean story<br><em>starts tonight</em>',
+    cta_sub:'Free forever · No credit card · Start Hangul in 5 minutes',
+    cta_btn_ios:'Download on App Store', cta_btn_android:'Android — Join Waitlist',
+    footer_privacy:'Privacy', footer_terms:'Terms', footer_support:'Support',
+    waitlist_title:'Join the Android Waitlist', waitlist_sub:'Google Play is coming soon. Be the first to know.',
+    waitlist_btn:'Notify me', waitlist_cancel:'Cancel', email_placeholder:'your@email.com',
   },
-  ko: {
-    heroAppName: 'K · 사 주',
-    heroTitle: '당신의 운명은<br><em>태어난 그 순간에 새겨졌습니다</em>',
-    heroSubtitle: '3,000년의 지혜 — 생년월일시 四柱八字로 풀어내는 나의 삶. 15개 언어로 전 세계와 함께합니다.',
-    ctaPrimary: '▸ 무료 다운로드',
-    ctaLearn: '사주란 무엇인가?',
-    sajuLabel: '동양의 지혜',
-    sajuTitle: '사주(四柱)란 무엇인가?',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>사주(四柱八字)</strong>는 태어난 연·월·일·시의 네 기둥에 담긴 여덟 글자입니다. 출생 순간 하늘의 기운이 고스란히 담겨, 한 사람의 기질·인연·운의 흐름을 담고 있습니다.</p><p style="margin-bottom:20px">서양 별자리가 하나의 태양궁을 중심으로 보는 것과 달리, 사주는 <strong>오행(木火土金水)</strong>의 상생·상극 원리를 통해 60년 주기의 대운과 매년 세운의 흐름까지 읽어냅니다.</p><p>왕과 장군, 혼인을 주관하던 사주쟁이의 언어가 이제 <strong>K-Saju</strong>를 통해 전 세계인의 손 안에 있습니다.</p>`,
-    p1label:'제1주', p1name:'년주(年柱) — 뿌리', p1desc:'출생 연도로 결정됩니다. 선대의 기운, 사회적 명성, 초년 운세를 담습니다. 12지신의 영향을 받습니다.',
-    p2label:'제2주', p2name:'월주(月柱) — 성장', p2desc:'출생 월로 결정됩니다. 부모·형제·직업 기반, 청·장년 운세를 관장합니다.',
-    p3label:'제3주', p3name:'일주(日柱) — 나', p3desc:'가장 중요한 기둥. 일간(日干)이 진짜 나 자신입니다. 본성, 배우자 인연, 내면세계를 나타냅니다.',
-    p4label:'제4주', p4name:'시주(時柱) — 결실', p4desc:'출생 시각으로 결정됩니다. 자녀, 노년 운세, 삶의 유산을 밝혀줍니다.',
-    ohaengLabel:'오행(五行)',
-    ohaengDesc:'목(木)·화(火)·토(土)·금(金)·수(水). 이 다섯 기운이 세상 모든 것에 흐릅니다. 조화로우면 순탄하고, 편중되면 파란이 — 그리고 기회가 찾아옵니다.',
-    vsLabel:'동서양의 만남', vsTitle:'사주 vs 서양 점성술',
-    saName:'한국 사주', westName:'서양 점성술',
-    vs1lbl:'기반', vs1ko:'생년+월+일+<strong style="color:var(--gold-light)">시</strong> — 총 8자(팔자)',
-    vs1en:'태양궁(생년월일) + 어센던트·달 궁',
-    vs2lbl:'체계', vs2ko:'60갑자(天干地支) 순환 체계',
-    vs2en:'황도대 12궁, 태양년 기반 행성 위치',
-    vs3lbl:'주안점', vs3ko:'인생 주기, 운의 타이밍, 인연, 오행 균형',
-    vs3en:'성격 유형, 심리 특성, 궁합',
-    vs4lbl:'예측 방식', vs4ko:'10년 대운 + 매년 세운으로 동적으로 변화',
-    vs4en:'행성 트랜짓(진행 행성)이 출생 차트를 통과',
-    featuresLabel:'K-Saju 기능', featuresTitle:'당신의 운명에 필요한 모든 것',
-    f1t:'오늘의 운세', f1d:'매일 아침 나의 일주(日柱) 에너지, 길한 시간대, 오늘 우주의 메시지를 받아보세요. Claude AI가 개인화된 깊이 있는 해석을 제공합니다.',
-    f2t:'K-퍼스널리티', f2d:'일간(日干) 원소, 강약, 세상과 내가 맺는 관계 방식까지 — 사주로 들여다보는 가장 솔직한 자화상입니다.',
-    f3t:'길일 캘린더', f3d:'결혼, 이사, 수술, 사업 시작일… 전통 길일 계산과 현대 캘린더 UI가 만났습니다. 최적의 날을 잡아보세요.',
-    f4t:'관계 사주', f4d:'가족, 연인, 친구를 추가하고 사주 궁합을 분석하세요. 어디서 통하고 어디서 부딪히는지, 그 해법까지 안내합니다.',
-    f5t:'관상 분석', f5d:'관상학(觀相學)은 얼굴에 새겨진 운명을 읽는 학문입니다. 사진 한 장으로 AI가 삶의 지표를 분석해 드립니다.',
-    f6t:'더 물어보기', f6d:'사주에 정통한 AI 오라클과 대화하세요. 이직 타이밍, 결혼 인연, 올해 왜 힘든지… 내 차트를 기반으로 답합니다.',
-    testimonialText:'"사람은 날 때부터 팔자가 있다."',
-    testimonialSrc:'한국 속담',
-    dlLabel:'나의 사주 시작하기', dlTitle:'K-Saju 다운로드',
-    dlSubtitle:'무료로 시작하세요. 15개 언어 지원. 당신의 사주가 기다리고 있습니다.',
-    iosSub:'App Store에서', androidSub:'Google Play에서',
-    scrollHint:'아래로',
+  ko:{
+    lang_select_title:'언어를 선택하세요',
+    nav_features:'기능', nav_pricing:'가격', nav_support:'지원', nav_cta:'다운로드',
+    hero_eyebrow:'AI 한국어 학습 · iOS 출시',
+    hero_title:'당신의 모국어 방식으로<br><em>한국어를 배우세요</em>',
+    hero_sub:'달나라는 당신의 모국어에 맞게 발음 코칭을 맞춤화하고, K-드라마 상황과 한국 문화를 매 수업에 녹여냅니다.',
+    btn_ios:'App Store', btn_android:'Google Play — 알림 신청',
+    hero_proof:'영구 무료 · 15개 언어 지원 · iOS 16+',
+    l1_tag:'당신을 위한 맞춤형',
+    l1_title:'모국어가<br><em>가장 강력한 무기</em>입니다',
+    l1_sub:'대부분의 앱은 모든 학습자를 똑같이 다룹니다. 달나라는 당신의 모국어를 감지하고, 당신이 어려워하는 발음과 패턴을 정확히 파악해 집중 코칭합니다.',
+    l1_ja:'일본어', l1_en:'영어', l1_zh:'중국어', l1_vi:'베트남어',
+    l1_ja_issue:'ㄹ/ㅓ 구별, 받침 자음', l1_ja_badge:'유음 발음',
+    l1_en_issue:'ㄲ/ㅃ/ㅉ 경음, ㅡ 모음', l1_en_badge:'경음 자음',
+    l1_zh_issue:'받침 자음, 성조 패턴', l1_zh_badge:'음절 끝소리',
+    l1_vi_issue:'모음 길이, 경어 체계', l1_vi_badge:'경어 단계',
+    feat_tag:'이런 기능이 있어요', feat_title:'실제로 <em>쓰이는 한국어</em>를 배우세요',
+    f1_name:'AI 발음 코치', f1_desc:'실시간 음소 분석으로 원어민과의 차이를 정확히 파악하고, 모국어별 맞춤 피드백을 제공합니다.',
+    f2_name:'K-드라마 시나리오', f2_desc:'실제 드라마 장면으로 롤플레이를 연습하세요. 반말과 존댓말을 맥락에서 자연스럽게 배웁니다.',
+    f3_name:'AI 장기 기억 튜터', f3_desc:'튜터가 모든 세션을 기억합니다. 약한 어휘, 발음 패턴, 좋아하는 주제까지 — 갈수록 스마트해집니다.',
+    f4_name:'SRS 단어장', f4_desc:'망각 직전에 단어를 다시 보여주는 간격 반복 시스템으로 효율적으로 기억하세요.',
+    f5_name:'K-Pop 리스닝', f5_desc:'가사로 듣기 훈련, 받아쓰기, 발음 드릴까지 — 좋아하는 노래로 배웁니다.',
+    f6_name:'TOPIK 대비', f6_desc:'TOPIK I·II 실전 모의고사와 취약점 분석으로 다음에 무엇을 공부해야 할지 정확히 파악합니다.',
+    tag_premium:'프리미엄', tag_free3:'무료 · 3개 장면', tag_free:'무료', tag_addon:'애드온',
+    price_tag:'가격', price_title:'무료로 시작하고<br><em>한계 없이 성장하세요</em>',
+    tier_free:'무료', tier_monthly:'프리미엄 월간', tier_annual:'연간',
+    pf1:'한글 마스터 — 완전 무료', pf2:'일 1개 레슨', pf3:'AI 대화 · 하루 3회',
+    pf4:'기본 발음 피드백', pf5:'주간 K-표현',
+    pf6:'모국어 맞춤 코칭', pf7:'AI 대화 무제한', pf8:'TOPIK 모드',
+    pm1:'무료 플랜 전체 포함', pm2:'모국어별 AI 발음 교정', pm3:'AI 대화 무제한',
+    pm4:'모든 롤플레이 시나리오', pm5:'AI 작문 코치', pm6:'고급 SRS',
+    pm7:'AI 튜터 메모리', pm8:'커뮤니티 접속',
+    pa1:'프리미엄 전체 포함', pa2:'커뮤니티 우선 매칭', pa3:'진도 리포트 PDF',
+    pa4:'오프라인 학습 모드', pa5:'신기능 얼리 액세스', pa6:'광고 없음 (영구)',
+    annual_save:'50% 할인 — 월 $5', pill_popular:'가장 인기',
+    btn_free:'무료로 시작하기', btn_premium:'프리미엄 시작', btn_annual:'최고의 가성비',
+    addon_tag:'애드온 · 일회성 구매', addon_title:'좋아하는 것으로 <em>더 깊이</em> 파고들기',
+    addon_sub:'한 번 구매, 영구 소유. 무료/프리미엄 모두 사용 가능.',
+    a1_name:'발음 클리닉', a1_desc:'모국어별 음소 취약점을 집중 훈련하는 30일 집중 팩.',
+    a2_name:'K-드라마 패키지', a2_desc:'분기별 대화와 존댓말 가이드가 포함된 전체 시나리오 라이브러리.',
+    a3_name:'TOPIK 모의고사', a3_desc:'취약점 추적과 학습 계획이 포함된 TOPIK I·II 전체 문제집.',
+    a4_name:'비즈니스 한국어', a4_desc:'직장 시나리오, 이메일 템플릿, 비즈니스 경어 마스터리.',
+    a5_name:'K-Pop 리스닝', a5_desc:'받아쓰기 모드와 발음 드릴이 포함된 가사 기반 듣기 연습.',
+    a6_name:'스타터 번들', a6_desc:'발음 클리닉 + K-드라마 패키지 + K-Pop 리스닝.',
+    cta_title:'한국어 이야기가<br><em>오늘 밤 시작됩니다</em>',
+    cta_sub:'영구 무료 · 신용카드 불필요 · 5분 안에 한글 시작',
+    cta_btn_ios:'App Store에서 다운로드', cta_btn_android:'Android — 대기자 명단 등록',
+    footer_privacy:'개인정보처리방침', footer_terms:'이용약관', footer_support:'지원',
+    waitlist_title:'Android 대기자 명단', waitlist_sub:'Google Play 출시 예정입니다. 가장 먼저 알려드릴게요.',
+    waitlist_btn:'알림 받기', waitlist_cancel:'취소', email_placeholder:'이메일 주소',
   },
-  zh: {
-    heroAppName: 'K · 四 柱',
-    heroTitle: '你的命运<br><em>在出生那刻已定</em>',
-    heroSubtitle: '三千年韩国四柱命理 · 15种语言全球版',
-    ctaPrimary: '▸ 免费下载',
-    ctaLearn: '什么是四柱？',
-    sajuLabel: '东方智慧',
-    sajuTitle: '什么是四柱（사주）？',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>四柱八字</strong>，以出生年、月、日、时四柱，推演天干地支八字，勾勒一生命运轨迹。</p><p style="margin-bottom:20px">有别于西方星座仅凭太阳宫位，四柱融汇<strong>五行（木火土金水）</strong>相生相克之理，洞察六十年大运流年，不仅知性格，更知时机。</p><p>此乃帝王将相、婚姻媒妁千年所用之学。今日，<strong>K-Saju</strong>将其带给全球。</p>`,
-    p1label:'第一柱', p1name:'年柱 — 根基', p1desc:'出生年份所定。揭示祖先气运、社会声望与早年命运，受十二生肖主导。',
-    p2label:'第二柱', p2name:'月柱 — 成长', p2desc:'出生月份所定。主父母兄弟、事业根基与中年运势。',
-    p3label:'第三柱', p3name:'日柱 — 本我', p3desc:'最核心之柱。日干即真实自我——本性、婚姻缘分与内心世界。',
-    p4label:'第四柱', p4name:'时柱 — 传承', p4desc:'出生时辰所定。映照子女运、晚年福祉与人生遗泽。',
-    ohaengLabel:'五行',
-    ohaengDesc:'木·火·土·金·水。五行流于万物之中。平衡则顺，偏枯则变——变中有机。',
-    vsLabel:'东西方相遇', vsTitle:'四柱 vs 西方占星',
-    saName:'韩国四柱', westName:'西方占星',
-    vs1lbl:'基础', vs1ko:'年+月+日+<strong style="color:var(--gold-light)">时</strong> 四柱八字',
-    vs1en:'太阳星座（生日）+ 上升星座·月亮星座',
-    vs2lbl:'体系', vs2ko:'六十甲子（天干地支）循环体系',
-    vs2en:'黄道十二宫，以太阳年为基础',
-    vs3lbl:'侧重', vs3ko:'人生周期·时运·感情·五行均衡',
-    vs3en:'性格原型·心理特质·缘分',
-    vs4lbl:'预测方式', vs4ko:'十年大运 + 流年 动态变化',
-    vs4en:'行星过境，推运法',
-    featuresLabel:'K-Saju 功能', featuresTitle:'命运所需，一应俱全',
-    f1t:'每日运势', f1d:'每日清晨收到专属运势解读——五行能量变化、吉时、今日宇宙信息。由Claude AI提供个性化深度解析。',
-    f2t:'K-性格', f2d:'深度解析日干五行、强弱、处世方式——最真实的自我镜像。',
-    f3t:'吉日历', f3d:'婚嫁·乔迁·手术·开业，传统吉日计算与现代日历界面完美结合。',
-    f4t:'关系四柱', f4d:'添加家人、伴侣、朋友，分析四柱合婚。了解缘分深浅、矛盾根源与化解之道。',
-    f5t:'面相分析', f5d:'面相学（관상학）读取面容中的命运信息。上传照片，AI为您解读天生面相所藏的人生密码。',
-    f6t:'深度问答', f6d:'精通四柱的AI命理师随时待命。事业时机·婚姻缘分·流年困顿……基于您的八字给出解答。',
-    testimonialText:'"命由天定，运在人为。"',
-    testimonialSrc:'韩国谚语',
-    dlLabel:'开启命理之旅', dlTitle:'下载 K-Saju',
-    dlSubtitle:'免费开始。支持15种语言。您的四柱在等待您。',
-    iosSub:'下载自', androidSub:'获取自',
-    scrollHint:'向下',
-  },
-  ja: {
-    heroAppName: 'K · 四 柱',
-    heroTitle: 'あなたの運命は、<br><em>生まれたその瞬間に刻まれていた</em>',
-    heroSubtitle: '韓国に3,000年伝わる四柱推命（사주）は、生年月日時という四本の柱から、その人の本質・人間関係・運勢の流れを精緻に読み解く命理学です。15言語対応でグローバルに展開中。',
-    ctaPrimary: '▸ 無料でダウンロード',
-    ctaLearn: '사주とは何か？',
-    sajuLabel: '東洋の叡智',
-    sajuTitle: '사주（四柱）とは？',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>사주（四柱八字）</strong>とは、生まれた年・月・日・時の四つの柱に宿る八つの文字のことです。その組み合わせには、五行（木・火・土・金・水）の相生・相剋が凝縮されており、その人の気質・縁・運勢の大きな流れが映し出されます。</p><p style="margin-bottom:20px">西洋占星術が主に太陽星座によって性格を読むのに対し、四柱推命は<strong>60年周期の大運と毎年の歳運</strong>を通じて、人生の転機やタイミングまで動的に読み取ります。「いつ動くべきか、いつ待つべきか」を知ることこそが、사주の真髄です。</p><p>かつては王侯将相や縁組を司る専門家だけが用いた秘伝の学問が、今や<strong>K-Saju</strong>を通して世界中の人々の手に届くようになりました。</p>`,
-    p1label:'第一柱', p1name:'年柱（ねんちゅう）— 根', p1desc:'生まれた年によって決まります。先祖から受け継いだ気運、社会的な評判、初年の運勢を示します。十二支の影響を受けます。',
-    p2label:'第二柱', p2name:'月柱（つきちゅう）— 成長', p2desc:'生まれた月によって決まります。両親・兄弟との縁、職業の基盤、青年・壮年期の運勢を司ります。',
-    p3label:'第三柱', p3name:'日柱（にちちゅう）— 本我', p3desc:'四柱の中で最も重要な柱。日干（にっかん）がその人の真の自己を示します。本質的な気質、配偶者との縁、内面世界を表します。',
-    p4label:'第四柱', p4name:'時柱（じちゅう）— 結実', p4desc:'生まれた時間によって決まります。子供との縁、晩年の運勢、そしてその人が後世に遺すものを照らし出します。',
-    ohaengLabel:'五行（오행）',
-    ohaengDesc:'木・火・土・金・水。この五つの気は、あらゆる存在と瞬間に流れています。バランスが取れれば人生は順調に流れ、偏れば摩擦が生じます——そしてそこにこそ、変化の機会が宿ります。',
-    vsLabel:'東洋と西洋の出会い', vsTitle:'사주 vs 西洋占星術：何が違うのか',
-    saName:'韓国の四柱推命', westName:'西洋占星術',
-    vs1lbl:'基盤', vs1ko:'生年＋月＋日＋<strong style="color:var(--gold-light)">時刻</strong>の四柱八字（全8文字）',
-    vs1en:'太陽星座（誕生日）＋アセンダント・月星座',
-    vs2lbl:'体系', vs2ko:'60年周期の六十干支（天干地支）に基づく命理体系',
-    vs2en:'黄道十二宮と惑星配置による占星術（太陽年基準）',
-    vs3lbl:'主な焦点', vs3ko:'人生の周期・運勢のタイミング・人間関係・五行のバランス',
-    vs3en:'性格のアーキタイプ・心理的特性・相性',
-    vs4lbl:'予測のアプローチ', vs4ko:'10年ごとの大運と毎年の歳運によって動的に変化する',
-    vs4en:'出生チャートに対する惑星トランジット（通過）を用いる',
-    featuresLabel:'K-Saujの機能', featuresTitle:'あなたの運命に必要なすべてが、ここに',
-    f1t:'今日の運勢', f1d:'毎朝、あなた専用の日次사주リーディングをお届けします。五行エネルギーの変化、吉時間帯、今日の宇宙からのメッセージ。Claude AIによる個別解釈で、深みのある洞察を。',
-    f2t:'K-パーソナリティ', f2d:'日干の五行属性、強弱のバランス、あなたが世界とどのように関わっているか——사주が映し出す、最も正直な自己像です。',
-    f3t:'吉日カレンダー', f3d:'結婚・引越し・手術・起業など、重要な決断を最善の日取りで。伝統的な길일（吉日）計算を、モダンなカレンダーUIで。',
-    f4t:'関係사주', f4d:'家族・恋人・友人を登録し、四柱で相性を詳しく分析。どこで調和し、どこで衝突し、どう乗り越えるかを丁寧に解説します。',
-    f5t:'관상（顔相）分析', f5d:'관상학（顔相学）は、顔に刻まれた運命を読む韓国の伝統学問です。写真をアップロードするだけで、AIがあなたの生まれ持った顔の中に宿る人生の指標を分析します。',
-    f6t:'もっと質問する', f6d:'사주に精通したAIオラクルと対話してください。転職のタイミング、結婚の縁、今年なぜ辛いのか……あなた自身のチャートを根拠に、丁寧に答えます。',
-    testimonialText:'"人は生まれた瞬間から、すでに自分の八字を持っている。"',
-    testimonialSrc:'韓国のことわざ',
-    dlLabel:'運命の読み解きを始める', dlTitle:'K-Saju をダウンロード',
-    dlSubtitle:'無料でスタート。15言語対応。あなたの四柱が、ずっと待っています。',
-    iosSub:'App Storeから', androidSub:'Google Playから',
-    scrollHint:'スクロール',
-  },
-  ar: {
-    heroAppName: 'K · ساجو',
-    heroTitle: 'مصيرك نُقِشَ<br><em>في لحظة ميلادك</em>',
-    heroSubtitle: 'أركان المصير الأربعة — علم الأبراج الكوري العريق منذ 3000 عام — متاحٌ الآن للعالم بـ15 لغة.',
-    ctaPrimary: '▸ حمّل مجاناً',
-    ctaLearn: 'ما هو ساجو؟',
-    sajuLabel: 'الحكمة القديمة',
-    sajuTitle: 'ما هو سَجو (사주)؟',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>سَجو (四柱)</strong> يعني "الأركان الأربعة". في اللحظة التي وُلدت فيها، تآلفت السماء — السنة والشهر واليوم والساعة، كلٌّ منها يحمل جذعاً سماوياً وفرعاً أرضياً، مكوّنةً ثمانية أحرف تُخطّط رحلة حياتك بأسرها.</p><p style="margin-bottom:20px">خلافاً لعلم الفلك الغربي الذي يركّز على برج الشمس، يجمع سَجو <strong>القوى العنصرية الخمس</strong> — الخشب والنار والأرض والمعدن والماء — عبر دورات ستينية، ليكشف لك ليس فقط شخصيتك بل توقيت الحظ أيضاً.</p><p>مارسه الملوك والقادة وأصحاب الزيجات آلاف السنين في كوريا. اليوم، صار مليارات يستلهمونه يومياً، وبـ<strong>K-Saju</strong> أصبح ملكاً للعالم.</p>`,
-    p1label:'الركن الأول', p1name:'ركن السنة — الجذور', p1desc:'يُحدَّد بسنة الميلاد. يكشف كارما الأجداد والسمعة الاجتماعية ومصير مرحلة الطفولة. يحكمه الحيوانات الاثنا عشر.',
-    p2label:'الركن الثاني', p2name:'ركن الشهر — النمو', p2desc:'يُحدَّد بشهر الميلاد. يحكم العلاقة بالوالدين والإخوة وأسس المسيرة المهنية.',
-    p3label:'الركن الثالث', p3name:'ركن اليوم — الذات', p3desc:'الركن الأكثر شخصية. جذع اليوم هو حقيقة ذاتك — طبيعتك الجوهرية وطاقة الزواج وعالمك الداخلي.',
-    p4label:'الركن الرابع', p4name:'ركن الساعة — الإرث', p4desc:'يُصاغ بساعة الميلاد. يُضيء حظّ الأبناء ومرحلة الشيخوخة والإرث الذي تتركه خلفك.',
-    ohaengLabel:'العناصر الخمسة · 오행',
-    ohaengDesc:'الخشب · النار · الأرض · المعدن · الماء. تجري هذه القوى الخمس في كل كائن وكل لحظة. توازنها يُسلِّس الحياة، وخلَلها يفتح الباب للاحتكاك — والفرصة.',
-    vsLabel:'الشرق يلتقي الغرب', vsTitle:'سَجو vs علم الفلك الغربي',
-    saName:'سَجو الكوري', westName:'علم الفلك الغربي',
-    vs1lbl:'الأساس', vs1ko:'السنة + الشهر + اليوم + <strong style="color:var(--gold-light)">الساعة</strong> — 8 أحرف',
-    vs1en:'برج الشمس (تاريخ الميلاد) + الطالع والقمر',
-    vs2lbl:'النظام', vs2ko:'دورة الستين عاماً (天干地支) قائمة على التقويم الصيني',
-    vs2en:'البروج الاستوائية، مواضع الكواكب وفق السنة الشمسية',
-    vs3lbl:'محور التركيز', vs3ko:'دورات الحياة، توقيت الحظ، العلاقات، توازن العناصر',
-    vs3en:'النماذج الشخصية، السمات النفسية، التوافق',
-    vs4lbl:'أسلوب التنبؤ', vs4ko:'ديناميكي — يتحوّل عبر دورات الحظ الكبرى العشرية والحظ السنوي',
-    vs4en:'عبورات الكواكب عبر مواضع الميلاد',
-    featuresLabel:'داخل K-Saju', featuresTitle:'كل ما يحتاجه مصيرك',
-    f1t:'حظ اليوم', f1d:'في كل صباح، استقبل قراءتك اليومية — تحولات طاقة العناصر، الساعات المباركة، وما خطّته الكواكب. بإمكانيات Claude AI للتفسير العميق الشخصي.',
-    f2t:'K-الشخصية', f2d:'غوصٌ عميق في جوهر نمطك: عنصر سيد اليوم، نقاط القوة والضعف، وكيف تتعامل مع العالم — أصدق مرآة ستنظر إليها.',
-    f3t:'تقويم الأيام المباركة', f3d:'خطّط لزفافك، إطلاق مشروعك، عمليتك الجراحية، وقراراتك الكبرى في أنسب الأوقات.',
-    f4t:'سَجو العلاقات', f4d:'أضف عائلتك وشريكك وأصدقاءك. حلّل التوافق عبر الأركان الأربعة — اكتشف أين تتناغمون وأين تتعارضون.',
-    f5t:'تحليل ملامح الوجه', f5d:'علم الفراسة الكورية (관상학) يقرأ الحظ في الملامح. ارفع صورتك واحصل على تحليل AI لمؤشرات حياتك المكتوبة في وجهك.',
-    f6t:'اسأل المزيد', f6d:'محاور ذكاء اصطناعي متمرّس في سَجو. اسأله عن توقيت المسيرة، طاقة الزواج، أو ما يعنيه عامٌ عسير — وستأتيك الإجابات من خريطتك الحقيقية.',
-    testimonialText:'"لحظة ميلادك ليست صدفة — إنها توقيعك في نسيج الزمن."',
-    testimonialSrc:'مثل كوري',
-    dlLabel:'ابدأ قراءتك', dlTitle:'حمّل K-Saju',
-    dlSubtitle:'مجاني للبدء. 15 لغة. خريطتك في انتظارك.',
-    iosSub:'حمّل من', androidSub:'احصل عليه من',
-    scrollHint:'للأسفل',
-  },
-  fr: {
-    heroAppName: 'K · S A J U',
-    heroTitle: 'Votre destin, gravé<br><em>à l\'instant de votre naissance</em>',
-    heroSubtitle: 'Les Quatre Piliers du Destin — l\'art coréen vieux de 3 000 ans de lire le sort à travers l\'heure de naissance — désormais disponible dans 15 langues.',
-    ctaPrimary: '▸ Télécharger Gratuitement',
-    ctaLearn: 'Qu\'est-ce que le Saju ?',
-    sajuLabel: 'Sagesse Ancestrale',
-    sajuTitle: 'Qu\'est-ce que le 사주 (Saju) ?',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>Saju (四柱)</strong> signifie « Quatre Piliers ». À l'instant précis de votre naissance, le cosmos s'est aligné — l'Année, le Mois, le Jour et l'Heure portent chacun une Tige Céleste et une Branche Terrestre, formant huit caractères qui tracent la carte de toute votre vie.</p><p style="margin-bottom:20px">Contrairement à l'astrologie occidentale centrée sur un seul signe solaire, le Saju entrelace <strong>cinq forces élémentaires</strong> — Bois, Feu, Terre, Métal, Eau — à travers des cycles de 60 ans, révélant non seulement la personnalité mais le timing : quand agir, quand attendre, quand la fortune sourit.</p><p>Pratiqué en Corée depuis des millénaires par les rois et les stratèges, le Saju appartient aujourd'hui au monde entier grâce à <strong>K-Saju</strong>.</p>`,
-    p1label:'1er Pilier', p1name:'Pilier de l\'Année — Origine', p1desc:'Déterminé par l\'année de naissance. Révèle le karma ancestral, la réputation sociale et le destin des premières années.',
-    p2label:'2e Pilier', p2name:'Pilier du Mois — Croissance', p2desc:'Déterminé par le mois de naissance. Régit les parents, les frères et sœurs et les fondations professionnelles.',
-    p3label:'3e Pilier', p3name:'Pilier du Jour — Le Moi', p3desc:'Le pilier le plus personnel. La Tige du Jour est votre vrai moi — nature profonde, énergie conjugale, monde intérieur.',
-    p4label:'4e Pilier', p4name:'Pilier de l\'Heure — Héritage', p4desc:'Façonné par l\'heure de naissance. Éclaire les enfants, la vieillesse et l\'héritage que vous laissez.',
-    ohaengLabel:'Les Cinq Éléments · 오행',
-    ohaengDesc:'Bois · Feu · Terre · Métal · Eau. Ces cinq forces traversent chaque être et chaque instant. L\'équilibre fluidifie la vie ; le déséquilibre crée la friction — et l\'opportunité.',
-    vsLabel:'Orient & Occident', vsTitle:'Saju vs Astrologie Occidentale',
-    saName:'Saju Coréen', westName:'Astrologie Occidentale',
-    vs1lbl:'Fondement', vs1ko:'Année + Mois + Jour + <strong style="color:var(--gold-light)">Heure</strong> de naissance — 8 caractères',
-    vs1en:'Signe solaire (date de naissance) + Ascendant & Lune',
-    vs2lbl:'Système', vs2ko:'Cycle sexagésimal de 60 ans (天干地支) basé sur le calendrier chinois',
-    vs2en:'Zodiaque tropical, positions planétaires basées sur l\'année solaire',
-    vs3lbl:'Focus', vs3ko:'Cycles de vie, timing de fortune, relations, équilibre élémentaire',
-    vs3en:'Archétypes de personnalité, traits psychologiques, compatibilité',
-    vs4lbl:'Style Prédictif', vs4ko:'Dynamique — évolue selon les Grandes Périodes de Chance de 10 ans',
-    vs4en:'Basé sur les transits planétaires à travers le thème natal',
-    featuresLabel:'Dans K-Saju', featuresTitle:'Tout ce que votre destin requiert',
-    f1t:'Fortune du Jour', f1d:'Chaque matin, recevez votre lecture Saju quotidienne — shifts d\'énergie élémentaire, heures fastes, et ce que le cosmos a prévu. Propulsé par Claude AI pour des insights nuancés.',
-    f2t:'K-Personnalité', f2d:'Plongée dans votre archétype Saju : élément Maître du Jour, forces/faiblesses et façon d\'évoluer dans le monde — le miroir le plus honnête que vous ayez jamais regardé.',
-    f3t:'Calendrier des Jours Fastes', f3d:'Planifiez mariages, lancements, chirurgies sur les jours les plus favorables. Le calcul traditionnel길일 rencontre une UI calendrier moderne.',
-    f4t:'Saju des Relations', f4d:'Ajoutez famille, partenaires, amis. Analysez la compatibilité sur les quatre piliers — voyez où vous vous harmonisez, où vous vous heurtez.',
-    f5t:'Insight Visage (관상)', f5d:'La physiognomonie coréenne lit le destin dans le visage. Téléchargez une photo et recevez une analyse IA des indicateurs de vie inscrits dans vos traits.',
-    f6t:'Poser Plus de Questions', f6d:'Un oracle IA conversationnel maîtrisant le Saju. Interrogez-le sur le timing de carrière, l\'énergie conjugale, ou ce que signifie vraiment une mauvaise année.',
-    testimonialText:'"Votre moment de naissance n\'est pas un accident — c\'est votre signature dans le tissu du temps."',
-    testimonialSrc:'Proverbe Coréen',
-    dlLabel:'Commencer votre Lecture', dlTitle:'Télécharger K-Saju',
-    dlSubtitle:'Gratuit pour commencer. Disponible en 15 langues. Votre thème vous attend.',
-    iosSub:'Télécharger sur', androidSub:'Disponible sur',
-    scrollHint:'défiler',
-  },
-  de: {
-    heroAppName: 'K · S A J U',
-    heroTitle: 'Dein Schicksal, eingeschrieben<br><em>im Moment deiner Geburt</em>',
-    heroSubtitle: 'Die Vier Säulen des Schicksals — die 3.000 Jahre alte koreanische Kunst des Schicksalslesens — jetzt weltweit in 15 Sprachen verfügbar.',
-    ctaPrimary: '▸ Kostenlos laden',
-    ctaLearn: 'Was ist Saju?',
-    sajuLabel: 'Uralte Weisheit',
-    sajuTitle: 'Was ist 사주 (Saju)?',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>Saju (四柱)</strong> bedeutet „Vier Säulen". Im genauen Moment deiner Geburt richtete sich der Kosmos aus — Jahr, Monat, Tag und Stunde tragen je einen Himmelsstamm und Erdzweig, die acht Zeichen bilden, die den Weg deines gesamten Lebens kartieren.</p><p style="margin-bottom:20px">Anders als die westliche Astrologie, die sich auf ein einzelnes Sonnenzeichen konzentriert, verwebt Saju <strong>fünf Elementarkräfte</strong> — Holz, Feuer, Erde, Metall, Wasser — durch 60-Jahres-Zyklen, um nicht nur Persönlichkeit, sondern Timing zu enthüllen.</p><p>Von Königen und Strategen über Jahrtausende in Korea praktiziert — mit <strong>K-Saju</strong> gehört es nun der Welt.</p>`,
-    p1label:'1. Säule', p1name:'Jahrssäule — Ursprung', p1desc:'Bestimmt durch das Geburtsjahr. Enthüllt Ahnenkamma, sozialen Ruf und frühes Lebensschicksal.',
-    p2label:'2. Säule', p2name:'Monatssäule — Wachstum', p2desc:'Bestimmt durch den Geburtsmonat. Regiert Eltern, Geschwister und Karrierefundament.',
-    p3label:'3. Säule', p3name:'Tagessäule — Das Selbst', p3desc:'Die persönlichste Säule. Der Tagesstamm ist dein wahres Ich — Kernnatur, Heiratsenergie, innere Welt.',
-    p4label:'4. Säule', p4name:'Stundensäule — Vermächtnis', p4desc:'Geformt durch die Geburtsstunde. Erhellt Kinder, spätes Leben und das Erbe, das du hinterlässt.',
-    ohaengLabel:'Die Fünf Elemente · 오행',
-    ohaengDesc:'Holz · Feuer · Erde · Metall · Wasser. Diese fünf Kräfte fließen durch jedes Wesen und jeden Moment. Im Gleichgewicht fließt das Leben. Ungleichgewicht schafft Reibung — und Gelegenheit.',
-    vsLabel:'Ost trifft West', vsTitle:'Saju vs. Westliche Astrologie',
-    saName:'Koreanisches Saju', westName:'Westliche Astrologie',
-    vs1lbl:'Grundlage', vs1ko:'Jahr + Monat + Tag + <strong style="color:var(--gold-light)">Stunde</strong> der Geburt — 8 Zeichen',
-    vs1en:'Sonnenzeichen (Geburtsdatum) + Aszendent & Mondzeichen',
-    vs2lbl:'System', vs2ko:'60-jähriger Sexagesimalzyklus (天干地支) basierend auf dem chinesischen Kalender',
-    vs2en:'Tropischer Tierkreis, Planetenpositionen basierend auf dem Sonnenjahr',
-    vs3lbl:'Fokus', vs3ko:'Lebenszyklen, Glückstiming, Beziehungen und elementares Gleichgewicht',
-    vs3en:'Persönlichkeitsarchetypen, psychologische Merkmale, Kompatibilität',
-    vs4lbl:'Vorhersagestil', vs4ko:'Dynamisch — verändert sich über 10-jährige große Glückszyklen und Jahresglück',
-    vs4en:'Transitbasiert — Planeten bewegen sich durch Geburtshoroskop-Positionen',
-    featuresLabel:'In K-Saju', featuresTitle:'Alles, was dein Schicksal braucht',
-    f1t:'Tagesglück', f1d:'Jeden Morgen dein tägliches Saju-Reading — Elementarenergieverschiebungen, günstige Stunden und was der Kosmos plant. Angetrieben von Claude AI.',
-    f2t:'K-Persönlichkeit', f2d:'Tiefenanalyse deines Saju-Archetyps: Tagesmeister-Element, Stärken/Schwächen und wie du dich in der Welt bewegst.',
-    f3t:'Glückstage-Kalender', f3d:'Plane Hochzeiten, Launches, OPs und große Entscheidungen an den günstigsten Tagen.',
-    f4t:'Beziehungs-Saju', f4d:'Füge Familie, Partner und Freunde hinzu. Analysiere Kompatibilität über alle vier Säulen.',
-    f5t:'Gesichtseinblick (관상)', f5d:'Koreanische Physiognomik liest das Schicksal im Gesicht. Lade ein Foto hoch für eine KI-Analyse.',
-    f6t:'Mehr fragen', f6d:'Ein konversationelles KI-Orakel, fließend in Saju. Frage nach Karrieretiming, Heiratsenergie oder was ein schwieriges Jahr wirklich bedeutet.',
-    testimonialText:'"Dein Geburtsmoment ist kein Zufall — er ist deine Unterschrift im Gewebe der Zeit."',
-    testimonialSrc:'Koreanisches Sprichwort',
-    dlLabel:'Dein Reading beginnen', dlTitle:'K-Saju Herunterladen',
-    dlSubtitle:'Kostenlos starten. 15 Sprachen. Dein Chart wartet auf dich.',
-    iosSub:'Laden im', androidSub:'Erhältlich bei',
-    scrollHint:'scrollen',
-  },
-  es: {
-    heroAppName: 'K · S A J U',
-    heroTitle: 'Tu destino, escrito<br><em>en el momento de tu nacimiento</em>',
-    heroSubtitle: 'Los Cuatro Pilares del Destino — el arte coreano de 3.000 años de leer el destino en el momento del nacimiento — ahora disponible en 15 idiomas.',
-    ctaPrimary: '▸ Descargar Gratis',
-    ctaLearn: '¿Qué es el Saju?',
-    sajuLabel: 'Sabiduría Ancestral',
-    sajuTitle: '¿Qué es el 사주 (Saju)?',
-    sajuIntro: `<p style="margin-bottom:20px"><strong>Saju (四柱)</strong> significa "Cuatro Pilares". En el momento exacto de tu nacimiento, el cosmos se alineó — Año, Mes, Día y Hora llevan cada uno un Tallo Celestial y una Rama Terrestre, formando ocho caracteres que mapean toda tu vida.</p><p style="margin-bottom:20px">A diferencia de la astrología occidental centrada en un signo solar, el Saju entrelaza <strong>cinco fuerzas elementales</strong> — Madera, Fuego, Tierra, Metal, Agua — a través de ciclos de 60 años, revelando no solo la personalidad sino el momento oportuno.</p><p>Practicado en Corea por reyes y estrategas durante milenios, hoy <strong>K-Saju</strong> lo trae al mundo.</p>`,
-    p1label:'1er Pilar', p1name:'Pilar del Año — Origen', p1desc:'Determinado por el año de nacimiento. Revela karma ancestral, reputación social y destino de la infancia.',
-    p2label:'2do Pilar', p2name:'Pilar del Mes — Crecimiento', p2desc:'Determinado por el mes de nacimiento. Rige padres, hermanos y cimientos profesionales.',
-    p3label:'3er Pilar', p3name:'Pilar del Día — El Yo', p3desc:'El pilar más personal. El Tallo del Día es tu verdadero ser — naturaleza esencial, energía matrimonial, mundo interior.',
-    p4label:'4to Pilar', p4name:'Pilar de la Hora — Legado', p4desc:'Formado por la hora de nacimiento. Ilumina hijos, vejez y el legado que dejas.',
-    ohaengLabel:'Los Cinco Elementos · 오행',
-    ohaengDesc:'Madera · Fuego · Tierra · Metal · Agua. Estas cinco fuerzas fluyen a través de cada ser y cada momento. El equilibrio fluidifica la vida; el desequilibrio invita la fricción — y la oportunidad.',
-    vsLabel:'Oriente encuentra Occidente', vsTitle:'Saju vs. Astrología Occidental',
-    saName:'Saju Coreano', westName:'Astrología Occidental',
-    vs1lbl:'Base', vs1ko:'Año + Mes + Día + <strong style="color:var(--gold-light)">Hora</strong> de nacimiento — 8 caracteres',
-    vs1en:'Signo solar (fecha de nacimiento) + Ascendente y Luna',
-    vs2lbl:'Sistema', vs2ko:'Ciclo Sexagesimal de 60 años (天干地支) basado en el calendario chino',
-    vs2en:'Zodíaco tropical, posiciones planetarias basadas en el año solar',
-    vs3lbl:'Enfoque', vs3ko:'Ciclos de vida, timing de fortuna, relaciones y equilibrio elemental',
-    vs3en:'Arquetipos de personalidad, rasgos psicológicos, compatibilidad',
-    vs4lbl:'Estilo Predictivo', vs4ko:'Dinámico — cambia según Grandes Ciclos de Suerte de 10 años',
-    vs4en:'Basado en tránsitos — planetas moviéndose por posiciones del carta natal',
-    featuresLabel:'Dentro de K-Saju', featuresTitle:'Todo lo que tu destino necesita',
-    f1t:'Fortuna del Día', f1d:'Cada mañana, recibe tu lectura Saju diaria — cambios de energía elemental, horas auspiciosas y lo que el cosmos tiene planeado.',
-    f2t:'K-Personalidad', f2d:'Un análisis profundo de tu arquetipo Saju: elemento Maestro del Día, fortalezas/debilidades y cómo te mueves por el mundo.',
-    f3t:'Calendario de Días Auspiciosos', f3d:'Planifica bodas, lanzamientos, cirugías y grandes decisiones en los días más favorables.',
-    f4t:'Saju de Relaciones', f4d:'Añade familia, parejas y amigos. Analiza compatibilidad en los cuatro pilares.',
-    f5t:'Insight Facial (관상)', f5d:'La fisiognomía coreana lee el destino en el rostro. Sube una foto y recibe un análisis IA.',
-    f6t:'Preguntar Más', f6d:'Un oráculo IA conversacional experto en Saju. Pregunta sobre timing profesional, energía matrimonial o qué significa un año difícil.',
-    testimonialText:'"Tu momento de nacimiento no es un accidente — es tu firma en el tejido del tiempo."',
-    testimonialSrc:'Proverbio Coreano',
-    dlLabel:'Comienza tu Lectura', dlTitle:'Descargar K-Saju',
-    dlSubtitle:'Gratis para empezar. Disponible en 15 idiomas. Tu carta te espera.',
-    iosSub:'Descargar en', androidSub:'Disponible en',
-    scrollHint:'deslizar',
+  ja:{
+    lang_select_title:'言語を選択してください',
+    nav_features:'機能', nav_pricing:'料金', nav_support:'サポート', nav_cta:'ダウンロード',
+    hero_eyebrow:'AI韓国語学習 · iOS版リリース中',
+    hero_title:'あなたの母国語で<br><em>韓国語を学ぼう</em>',
+    hero_sub:'達那羅はあなたの母国語に合わせて発音コーチングをカスタマイズし、K-ドラマのシナリオと韓国文化を毎レッスンに織り込みます。',
+    btn_ios:'App Store', btn_android:'Google Play — 通知登録',
+    hero_proof:'永久無料 · 15言語対応 · iOS 16+',
+    l1_tag:'あなた専用',
+    l1_title:'母国語こそ<br><em>最強の武器</em>です',
+    l1_sub:'ほとんどのアプリは全学習者を同じように扱います。達那羅はあなたの母国語を検出し、あなたにとって難しい発音とパターンを正確にターゲットにします。',
+    l1_ja:'日本語', l1_en:'英語', l1_zh:'中国語', l1_vi:'ベトナム語',
+    l1_ja_issue:'ㄹ/ㅓの区別、音節末子音', l1_ja_badge:'流音の発音',
+    l1_en_issue:'ㄲ/ㅃ/ㅉ 濃音、ㅡ 母音', l1_en_badge:'濃音子音',
+    l1_zh_issue:'받침末子音、声調パターン', l1_zh_badge:'音節末の発音',
+    l1_vi_issue:'母音の長さ、敬語体系', l1_vi_badge:'敬語レベル',
+    feat_tag:'含まれる機能', feat_title:'<em>実際に使われる</em>韓国語を学ぼう',
+    f1_name:'AI発音コーチ', f1_desc:'リアルタイムの音素分析。あなたの母国語が難しくする発音を正確にターゲットにします。',
+    f2_name:'K-ドラマシナリオ', f2_desc:'実際のドラマ場面でロールプレイを練習。반말と존댓말を文脈で学びます。',
+    f3_name:'長期AIメモリ', f3_desc:'チューターが全セッションを記憶。弱い語彙、発音のギャップ、興味を持つトピックまで覚えています。',
+    f4_name:'SRSフラッシュカード', f4_desc:'忘れる直前に単語が再登場。あなたの記憶曲線に合わせた間隔反復。',
+    f5_name:'K-Popリスニング', f5_desc:'歌詞でディクテーション、発音ドリル。好きな曲で学べます。',
+    f6_name:'TOPIK対策', f6_desc:'TOPIK I・IIの完全模擬試験と弱点分析。次に何を勉強すべきかが明確に。',
+    tag_premium:'プレミアム', tag_free3:'無料 · 3シーン', tag_free:'無料', tag_addon:'アドオン',
+    price_tag:'料金', price_title:'無料で始めて<br><em>無限に成長しよう</em>',
+    tier_free:'無料', tier_monthly:'プレミアム / 月', tier_annual:'年払い',
+    pf1:'ハングルマスター — 完全無料', pf2:'1日1レッスン', pf3:'AIチャット · 1日3回',
+    pf4:'基本発音フィードバック', pf5:'週次K表現',
+    pf6:'母国語対応コーチング', pf7:'AIチャット無制限', pf8:'TOPIKモード',
+    pm1:'無料プランの全機能', pm2:'母国語対応発音AI', pm3:'AIチャット無制限',
+    pm4:'全ロールプレイシナリオ', pm5:'AI作文コーチ', pm6:'高度なSRS',
+    pm7:'AIチューターメモリ', pm8:'コミュニティアクセス',
+    pa1:'プレミアムの全機能', pa2:'コミュニティ優先マッチング', pa3:'進捗レポートPDF',
+    pa4:'オフライン学習モード', pa5:'新機能先行アクセス', pa6:'広告なし（永久）',
+    annual_save:'50%割引 — 月$5', pill_popular:'最も人気',
+    btn_free:'無料で始める', btn_premium:'プレミアム開始', btn_annual:'最高のお得感',
+    addon_tag:'アドオン · 買い切り', addon_title:'好きなコンテンツで<em>もっと深く</em>',
+    addon_sub:'一度購入すれば永久に使えます。無料・プレミアム両方で利用可能。',
+    a1_name:'発音クリニック', a1_desc:'母国語別の音素弱点を集中トレーニングする30日集中パック。',
+    a2_name:'K-ドラマパック', a2_desc:'分岐ダイアログと敬語ガイド付きの全シナリオライブラリ。',
+    a3_name:'TOPIK模擬試験', a3_desc:'弱点追跡と学習プラン付きTOPIK I・II完全問題集。',
+    a4_name:'ビジネス韓国語', a4_desc:'職場シナリオ、メールテンプレート、ビジネス敬語マスター。',
+    a5_name:'K-Popリスニング', a5_desc:'ディクテーションモードと発音ドリル付きの歌詞ベースリスニング。',
+    a6_name:'スターターバンドル', a6_desc:'発音クリニック + K-ドラマパック + K-Popリスニング。',
+    cta_title:'韓国語の物語が<br><em>今夜から始まります</em>',
+    cta_sub:'永久無料 · クレジットカード不要 · 5分でハングル開始',
+    cta_btn_ios:'App Storeでダウンロード', cta_btn_android:'Android — 通知登録',
+    footer_privacy:'プライバシー', footer_terms:'利用規約', footer_support:'サポート',
+    waitlist_title:'Android待機リスト', waitlist_sub:'Google Play近日公開。最初にお知らせします。',
+    waitlist_btn:'通知を受け取る', waitlist_cancel:'キャンセル', email_placeholder:'メールアドレス',
   },
 };
+// helper: build a full translation object from positional args
+function _t(a){ return {
+  hero_title:a[0], hero_sub:a[1], btn_android:a[2], hero_proof:a[3],
+  nav_features:a[4], nav_pricing:a[5], nav_support:a[6], nav_cta:a[7],
+  hero_eyebrow:a[8], btn_ios:a[9],
+  l1_tag:a[10], l1_title:a[11], l1_sub:a[12],
+  l1_ja:a[13], l1_en:a[14], l1_zh:a[15], l1_vi:a[16],
+  l1_ja_issue:a[17], l1_ja_badge:a[18],
+  l1_en_issue:a[19], l1_en_badge:a[20],
+  l1_zh_issue:a[21], l1_zh_badge:a[22],
+  l1_vi_issue:a[23], l1_vi_badge:a[24],
+  feat_tag:a[25], feat_title:a[26],
+  f1_name:a[27], f1_desc:a[28], f2_name:a[29], f2_desc:a[30],
+  f3_name:a[31], f3_desc:a[32], f4_name:a[33], f4_desc:a[34],
+  f5_name:a[35], f5_desc:a[36], f6_name:a[37], f6_desc:a[38],
+  tag_premium:a[39], tag_free3:a[40], tag_free:a[41], tag_addon:a[42],
+  price_tag:a[43], price_title:a[44],
+  tier_free:a[45], tier_monthly:a[46], tier_annual:a[47],
+  pf1:a[48], pf2:a[49], pf3:a[50], pf4:a[51], pf5:a[52],
+  pf6:a[53], pf7:a[54], pf8:a[55],
+  pm1:a[56], pm2:a[57], pm3:a[58], pm4:a[59], pm5:a[60], pm6:a[61], pm7:a[62], pm8:a[63],
+  pa1:a[64], pa2:a[65], pa3:a[66], pa4:a[67], pa5:a[68], pa6:a[69],
+  annual_save:a[70], pill_popular:a[71],
+  btn_free:a[72], btn_premium:a[73], btn_annual:a[74],
+  addon_tag:a[75], addon_title:a[76], addon_sub:a[77],
+  a1_name:a[78], a1_desc:a[79], a2_name:a[80], a2_desc:a[81],
+  a3_name:a[82], a3_desc:a[83], a4_name:a[84], a4_desc:a[85],
+  a5_name:a[86], a5_desc:a[87], a6_name:a[88], a6_desc:a[89],
+  cta_title:a[90], cta_sub:a[91], cta_btn_ios:a[92], cta_btn_android:a[93],
+  footer_privacy:a[94], footer_terms:a[95], footer_support:a[96],
+  waitlist_title:a[97], waitlist_sub:a[98], waitlist_btn:a[99], waitlist_cancel:a[100],
+  email_placeholder:a[101], lang_select_title:a[102]
+};}
+
+// T entries already defined for en, ko, ja above — now add remaining 22:
+
+T['zh'] = _t([
+  '用你母语的方式<br><em>学习韩语</em>',
+  '达那罗根据你的母语定制发音辅导，将K剧场景和韩国文化融入每一节课。',
+  'Google Play — 提前注册','永久免费 · 25种语言 · iOS 16+',
+  '功能','价格','支持','下载',
+  'AI韩语学习 · iOS版上线','App Store',
+  '专为你定制','你的母语<br>是你的<em>秘密武器</em>',
+  '大多数应用对所有学习者一视同仁。达那罗识别你的母语，精准针对让你困难的发音和模式。',
+  '日语','英语','中文','越南语',
+  '功能介绍','学习<em>真正在用的</em>韩语',
+  'AI发音教练','实时音素分析，针对母语难点精准反馈。',
+  'K剧场景','用真实剧情对话练习反말和존댓말。',
+  '长期AI记忆','导师记住每次课——弱点词汇、发音差距、你的兴趣点。越学越聪明。',
+  '间隔重复单词卡','单词在最佳时机出现，声音和含义同时学习。',
+  'K-Pop听力','歌词听写、发音练习——用你喜欢的歌曲来学。',
+  'TOPIK备考','TOPIK I&II完整模拟题，弱点分析精准到位。',
+  '高级','免费 · 3个场景','免费','附加包',
+  '价格','免费开始<br><em>无限成长</em>',
+  '免费','高级 / 月','年付',
+  '韩文字母大师——完全免费','每天1节课','AI对话 · 每天3次','基础发音反馈','每周K表达',
+  '母语感知辅导','无限AI对话','TOPIK模式',
+  '包含所有免费功能','母语别AI发音','无限AI对话','全部角色扮演场景','AI写作教练','高级SRS','AI导师记忆','社区访问',
+  '包含所有高级功能','社区优先匹配','进度报告PDF','离线学习模式','新功能优先体验','永久无广告',
+  '节省50% — 每月$5','最受欢迎','免费开始','开始高级版','最高性价比',
+  '附加包 · 一次性购买','深入<em>你热爱的内容</em>','一次购买，永久拥有。免费和高级版均可用。',
+  '发音诊所','30天集中训练，针对母语特定音素弱点。',
+  'K剧套餐','含分支对话和敬语指导的完整场景库。',
+  'TOPIK模拟考试','含弱点追踪的TOPIK I&II完整练习题。',
+  '商务韩语','职场场景、邮件模板和商务敬语掌握。',
+  'K-Pop听力','含听写模式和发音练习的歌词听力训练。',
+  '入门套装','发音诊所 + K剧套餐 + K-Pop听力。',
+  '你的韩语故事<br><em>从今晚开始</em>','永久免费 · 无需信用卡 · 5分钟学会韩文字母',
+  '在App Store下载','Android — 加入候补名单',
+  '隐私政策','服务条款','支持',
+  '加入Android候补名单','Google Play即将上线，第一时间通知您。',
+  '通知我','取消','你的邮箱','选择语言'
+]);
+
+T['zh-TW'] = _t([
+  '用你母語的方式<br><em>學習韓語</em>',
+  '達那羅根據你的母語定製發音輔導，將K劇場景和韓國文化融入每一節課。',
+  'Google Play — 提前報名','永久免費 · 25種語言 · iOS 16+',
+  '功能','價格','支援','下載',
+  'AI韓語學習 · iOS版上線','App Store',
+  '專為你定製','你的母語<br>是你的<em>秘密武器</em>',
+  '大多數應用對所有學習者一視同仁。達那羅識別你的母語，精準針對讓你困難的發音和模式。',
+  '日語','英語','中文','越南語',
+  'ㄹ/ㅓ區別、音節末尾輔音','流音發音',
+  'ㄲ/ㅃ/ㅉ緊音、ㅡ元音','緊音輔音',
+  '받침尾輔音、聲調模式','音節尾音',
+  '元音長度、敬語體系','敬語級別',
+  'ㄹ/ㅓ区别、音节末尾辅音','流音发音',
+  'ㄲ/ㅃ/ㅉ紧音、ㅡ元音','紧音辅音',
+  '받침尾辅音、声调模式','音节尾音',
+  '元音长度、敬语体系','敬语级别',
+  '功能介紹','學習<em>真正在用的</em>韓語',
+  'AI發音教練','即時音素分析，針對母語難點精準反饋。',
+  'K劇場景','用真實劇情對話練習反말和존댓말。',
+  '長期AI記憶','導師記住每次課——弱點詞彙、發音差距、你的興趣點。越學越聰明。',
+  '間隔重複單字卡','單字在最佳時機出現，聲音和含義同時學習。',
+  'K-Pop聽力','歌詞聽寫、發音練習——用你喜歡的歌曲來學。',
+  'TOPIK備考','TOPIK I&II完整模擬題，弱點分析精準到位。',
+  '高級','免費 · 3個場景','免費','附加包',
+  '價格','免費開始<br><em>無限成長</em>',
+  '免費','高級 / 月','年付',
+  '韓文字母大師——完全免費','每天1節課','AI對話 · 每天3次','基礎發音回饋','每週K表達',
+  '母語感知輔導','無限AI對話','TOPIK模式',
+  '包含所有免費功能','母語別AI發音','無限AI對話','全部角色扮演場景','AI寫作教練','高級SRS','AI導師記憶','社群訪問',
+  '包含所有高級功能','社群優先配對','進度報告PDF','離線學習模式','新功能優先體驗','永久無廣告',
+  '節省50% — 每月$5','最受歡迎','免費開始','開始高級版','最高性價比',
+  '附加包 · 一次性購買','深入<em>你熱愛的內容</em>','一次購買，永久擁有。免費和高級版均可用。',
+  '發音診所','30天集中訓練，針對母語特定音素弱點。',
+  'K劇套餐','含分支對話和敬語指導的完整場景庫。',
+  'TOPIK模擬考試','含弱點追蹤的TOPIK I&II完整練習題。',
+  '商務韓語','職場場景、郵件模板和商務敬語掌握。',
+  'K-Pop聽力','含聽寫模式和發音練習的歌詞聽力訓練。',
+  '入門套裝','發音診所 + K劇套餐 + K-Pop聽力。',
+  '你的韓語故事<br><em>從今晚開始</em>','永久免費 · 無需信用卡 · 5分鐘學會韓文字母',
+  '在App Store下載','Android — 加入候補名單',
+  '隱私政策','服務條款','支援',
+  '加入Android候補名單','Google Play即將上線，第一時間通知您。',
+  '通知我','取消','你的郵箱','選擇語言'
+]);
+
+T['vi'] = _t([
+  'Học tiếng Hàn theo cách<br><em>não bạn đã quen</em>',
+  'Dalnara dạy tiếng Hàn dựa trên ngôn ngữ mẹ đẻ của bạn — luyện phát âm cá nhân hóa, tình huống K-Drama và văn hóa trong mỗi bài học.',
+  'Google Play — Đăng ký thông báo','Miễn phí mãi · 25 ngôn ngữ · iOS 16+',
+  'Tính năng','Giá','Hỗ trợ','Tải về',
+  'Học tiếng Hàn bằng AI · Có trên iOS','App Store',
+  'Được tùy chỉnh cho bạn','Tiếng mẹ đẻ<br>là <em>vũ khí bí mật</em> của bạn',
+  'Hầu hết ứng dụng đối xử như nhau với mọi người. Dalnara phát hiện tiếng mẹ đẻ của bạn và nhắm vào đúng âm thanh gây khó khăn.',
+  'Tiếng Nhật','Tiếng Anh','Tiếng Trung','Tiếng Việt',
+  'ㄹ/ㅓ phân biệt, phụ âm cuối âm tiết','Âm lỏng',
+  'ㄲ/ㅃ/ㅉ phụ âm căng, nguyên âm ㅡ','Phụ âm căng',
+  'Phụ âm cuối 받침, mẫu thanh điệu','Âm tiết cuối',
+  'Độ dài nguyên âm, cấp độ kính ngữ','Cấp độ kính ngữ',
+  'Tính năng nổi bật','Tiếng Hàn <em>thực tế và sống động</em>',
+  'Huấn luyện viên phát âm AI','Phân tích âm vị thời gian thực, phản hồi theo tiếng mẹ đẻ.',
+  'Tình huống K-Drama','Luyện hội thoại thực từ phim. Học 반말 và 존댓말 trong ngữ cảnh.',
+  'AI Gia sư có trí nhớ dài hạn','Gia sư nhớ mọi buổi học — từ yếu, lỗ hổng phát âm, sở thích của bạn.',
+  'Thẻ SRS thông minh','Từ vựng xuất hiện đúng lúc. Học âm và nghĩa cùng nhau.',
+  'Nghe K-Pop','Nghe chính tả, luyện từ ngữ — với những bài hát bạn yêu thích.',
+  'Luyện TOPIK','Đề thi thử TOPIK I & II đầy đủ với phân tích điểm yếu.',
+  'Premium','Miễn phí · 3 tình huống','Miễn phí','Tiện ích bổ sung',
+  'Giá cả','Bắt đầu miễn phí.<br><em>Phát triển không giới hạn.</em>',
+  'Miễn phí','Premium / tháng','Hàng năm',
+  'Hangul Master — hoàn toàn miễn phí','1 bài học mỗi ngày','Chat AI · 3 lần/ngày','Phản hồi phát âm cơ bản','K-Biểu đạt hàng tuần',
+  'Luyện theo tiếng mẹ đẻ','Chat AI không giới hạn','Chế độ TOPIK',
+  'Tất cả tính năng Miễn phí','Phát âm AI theo tiếng mẹ đẻ','Hội thoại AI không giới hạn','Tất cả tình huống nhập vai','Gia sư viết AI','SRS nâng cao','Trí nhớ AI','Truy cập cộng đồng',
+  'Tất cả tính năng Premium','Ưu tiên kết đôi cộng đồng','Báo cáo tiến độ PDF','Học ngoại tuyến','Truy cập tính năng sớm','Không quảng cáo mãi mãi',
+  'Tiết kiệm 50% — $5/tháng','Phổ biến nhất','Bắt đầu miễn phí','Bắt đầu Premium','Giá trị tốt nhất',
+  'Tiện ích bổ sung · Mua một lần','Đào sâu vào <em>điều bạn yêu thích</em>','Mua một lần, dùng mãi mãi. Dùng được với Miễn phí và Premium.',
+  'Phòng khám phát âm','Gói 30 ngày tập trung vào điểm yếu âm vị theo tiếng mẹ đẻ.',
+  'Gói K-Drama','Thư viện tình huống đầy đủ với hội thoại phân nhánh và hướng dẫn kính ngữ.',
+  'Đề thi thử TOPIK','Bộ đề TOPIK I & II đầy đủ với theo dõi điểm yếu.',
+  'Tiếng Hàn thương mại','Tình huống công sở, mẫu email, kính ngữ kinh doanh.',
+  'Nghe K-Pop','Luyện nghe qua lời bài hát với chế độ nghe chính tả.',
+  'Gói Khởi đầu','Phòng khám phát âm + Gói K-Drama + Nghe K-Pop.',
+  'Câu chuyện tiếng Hàn của bạn<br><em>bắt đầu tối nay</em>','Miễn phí mãi mãi · Không cần thẻ tín dụng · Bắt đầu Hangul trong 5 phút',
+  'Tải trên App Store','Android — Tham gia danh sách chờ',
+  'Chính sách bảo mật','Điều khoản','Hỗ trợ',
+  'Tham gia danh sách chờ Android','Google Play sắp ra mắt. Nhận thông báo đầu tiên.',
+  'Thông báo cho tôi','Hủy','email@email.com','Chọn ngôn ngữ'
+]);
+
+T['es'] = _t([
+  'Aprende coreano de la manera<br><em>en que tu cerebro ya funciona</em>',
+  'Dalnara enseña coreano con tu idioma nativo en mente — coaching personalizado, escenarios K-Drama y cultura en cada lección.',
+  'Google Play — Notificarme','Gratis para siempre · 25 idiomas · iOS 16+',
+  'Funciones','Precios','Soporte','Descargar',
+  'Aprendizaje de coreano con IA · En iOS','App Store',
+  'Hecho para ti','Tu lengua materna<br>es tu <em>arma secreta</em>',
+  'La mayoría de las apps tratan a todos igual. Dalnara detecta tu idioma nativo y apunta exactamente a los sonidos que te cuestan.',
+  'Japonés','Inglés','Chino','Vietnamita',
+  'Distinción ㄹ/ㅓ, consonantes finales','Sonidos líquidos',
+  'Oclusivas tensas ㄲ/ㅃ/ㅉ, vocal ㅡ','Consonantes tensas',
+  'Consonantes finales 받침, patrones tonales','Finales silábicos',
+  'Longitud vocálica, niveles de cortesía','Niveles honoríficos',
+  'Qué incluye','Coreano tal como <em>se vive de verdad</em>',
+  'Coach de pronunciación IA','Análisis fonémico en tiempo real, retroalimentación específica para tu idioma.',
+  'Escenarios K-Drama','Practica conversaciones reales. Aprende 반말 y 존댓말 en contexto.',
+  'Memoria IA a largo plazo','Tu tutor recuerda cada sesión — vocabulario débil, brechas de pronunciación, tus intereses.',
+  'Tarjetas SRS inteligentes','El vocabulario aparece en el momento exacto. Aprende sonido y significado juntos.',
+  'Listening de K-Pop','Modo dictado, ejercicios de letras y pronunciación — con canciones que ya amas.',
+  'Preparación TOPIK','Exámenes completos TOPIK I y II con análisis detallado de debilidades.',
+  'Premium','Gratis · 3 escenarios','Gratis','Complemento',
+  'Precios','Empieza gratis.<br><em>Crece sin límites.</em>',
+  'Gratis','Premium / mes','Anual',
+  'Hangul Master — completo','1 lección por día','Chat IA · 3 sesiones/día','Retroalimentación básica de pronunciación','K-Expresión semanal',
+  'Coaching adaptado al idioma','Chat IA ilimitado','Modo TOPIK',
+  'Todo en Gratis','Pronunciación IA adaptada','Conversación IA ilimitada','Todos los escenarios de rol','Coach de escritura IA','SRS avanzado','Memoria del tutor IA','Acceso a comunidad',
+  'Todo en Premium','Emparejamiento prioritario','Informe de progreso PDF','Modo sin conexión','Acceso anticipado a funciones','Sin anuncios para siempre',
+  '50% de descuento — $5/mes','Más popular','Comenzar gratis','Iniciar Premium','Mejor valor',
+  'Complementos · Compra única','Profundiza en <em>lo que te apasiona</em>','Compra una vez, úsalo para siempre. Funciona con Gratis y Premium.',
+  'Clínica de pronunciación','Pack intensivo de 30 días para tus fonemas más difíciles.',
+  'Pack K-Drama','Biblioteca completa de escenarios con diálogos y guía de honoríficos.',
+  'Exámenes TOPIK','Sets completos de práctica TOPIK I y II con seguimiento de debilidades.',
+  'Coreano de negocios','Escenarios laborales, plantillas de email y honoríficos empresariales.',
+  'Listening K-Pop','Práctica de escucha basada en letras con modo dictado.',
+  'Pack de inicio','Clínica de pronunciación + Pack K-Drama + Listening K-Pop.',
+  'Tu historia en coreano<br><em>comienza esta noche</em>','Gratis para siempre · Sin tarjeta de crédito · Empieza Hangul en 5 minutos',
+  'Descargar en App Store','Android — Unirme a la lista',
+  'Privacidad','Términos','Soporte',
+  'Unirse a la lista de espera Android','Google Play llega pronto. Sé el primero en saberlo.',
+  'Notificarme','Cancelar','tu@email.com','Elige tu idioma'
+]);
+
+T['fr'] = _t([
+  'Apprenez le coréen de la façon<br><em>dont votre cerveau fonctionne</em>',
+  'Dalnara enseigne le coréen en tenant compte de votre langue maternelle — coaching personnalisé, scénarios K-Drama et culture à chaque leçon.',
+  'Google Play — Me notifier','Gratuit pour toujours · 25 langues · iOS 16+',
+  'Fonctionnalités','Tarifs','Support','Télécharger',
+  'Apprentissage du coréen par IA · Sur iOS','App Store',
+  'Fait pour vous','Votre langue maternelle<br>est votre <em>arme secrète</em>',
+  'La plupart des apps traitent tout le monde pareil. Dalnara détecte votre langue maternelle et cible exactement les sons qui vous posent problème.',
+  'Japonais','Anglais','Chinois','Vietnamien',
+  'Distinction ㄹ/ㅓ, consonnes finales','Sons liquides',
+  'Occlusives tendues ㄲ/ㅃ/ㅉ, voyelle ㅡ','Consonnes tendues',
+  'Consonnes finales 받침, schémas tonaux','Finales syllabiques',
+  'Longueur vocalique, niveaux de politesse','Niveaux honorifiques',
+  'Ce qui est inclus','Le coréen tel qu\'il est <em>vraiment vécu</em>',
+  'Coach de prononciation IA','Analyse phonémique en temps réel, retours spécifiques à votre langue.',
+  'Scénarios K-Drama','Pratiquez des conversations réelles. Apprenez 반말 et 존댓말 en contexte.',
+  'Mémoire IA à long terme','Votre tuteur se souvient de chaque session — vocabulaire faible, lacunes de prononciation, vos intérêts.',
+  'Flashcards SRS intelligentes','Le vocabulaire apparaît au bon moment. Apprenez son et sens ensemble.',
+  'Écoute K-Pop','Mode dictée, exercices de paroles et prononciation — avec des chansons que vous aimez.',
+  'Préparation TOPIK','Examens complets TOPIK I et II avec analyse détaillée des faiblesses.',
+  'Premium','Gratuit · 3 scènes','Gratuit','Module',
+  'Tarifs','Commencez gratuitement.<br><em>Grandissez sans limites.</em>',
+  'Gratuit','Premium / mois','Annuel',
+  'Hangul Master — complet','1 leçon par jour','Chat IA · 3 séances/jour','Retour de prononciation basique','K-Expression hebdomadaire',
+  'Coaching adapté','Chat IA illimité','Mode TOPIK',
+  'Tout en Gratuit','Prononciation IA adaptée','Conversation IA illimitée','Tous les scénarios de rôle','Coach d\'écriture IA','SRS avancé','Mémoire du tuteur IA','Accès communauté',
+  'Tout en Premium','Matching communautaire prioritaire','Rapport de progression PDF','Mode hors ligne','Accès anticipé aux nouvelles fonctions','Sans publicités à jamais',
+  '50% de réduction — 5$/mois','Le plus populaire','Commencer gratuitement','Démarrer Premium','Meilleur rapport qualité-prix',
+  'Modules · Achat unique','Allez plus loin avec <em>ce que vous aimez</em>','Achetez une fois, gardez pour toujours. Fonctionne avec Gratuit et Premium.',
+  'Clinique de prononciation','Pack intensif 30 jours ciblant vos faiblesses phonémiques.',
+  'Pack K-Drama','Bibliothèque complète de scénarios avec dialogues et guide des honorifiques.',
+  'Examens TOPIK','Sets complets de pratique TOPIK I et II avec suivi des faiblesses.',
+  'Coréen des affaires','Scénarios professionnels, modèles d\'emails et honorifiques d\'entreprise.',
+  'Écoute K-Pop','Pratique d\'écoute basée sur les paroles avec mode dictée.',
+  'Pack de démarrage','Clinique de prononciation + Pack K-Drama + Écoute K-Pop.',
+  'Votre histoire en coréen<br><em>commence ce soir</em>','Gratuit pour toujours · Sans carte bancaire · Commencez Hangul en 5 minutes',
+  'Télécharger sur App Store','Android — Rejoindre la liste d\'attente',
+  'Confidentialité','Conditions','Support',
+  'Rejoindre la liste d\'attente Android','Google Play arrive bientôt. Soyez le premier informé.',
+  'Me notifier','Annuler','votre@email.com','Choisissez votre langue'
+]);
+
+T['de'] = _t([
+  'Lerne Koreanisch so,<br><em>wie dein Gehirn es versteht</em>',
+  'Dalnara bringt dir Koreanisch mit deiner Muttersprache im Blick — maßgeschneidertes Coaching, K-Drama-Szenarien und Kultur in jeder Lektion.',
+  'Google Play — Benachrichtigen','Für immer kostenlos · 25 Sprachen · iOS 16+',
+  'Funktionen','Preise','Support','Herunterladen',
+  'KI-gestütztes Koreanisch · Auf iOS','App Store',
+  'Für dich gemacht','Deine Muttersprache<br>ist deine <em>Geheimwaffe</em>',
+  'Die meisten Apps behandeln alle gleich. Dalnara erkennt deine Muttersprache und zielt genau auf die Laute, die dir schwerfallen.',
+  'Japanisch','Englisch','Chinesisch','Vietnamesisch',
+  'ㄹ/ㅓ-Unterscheidung, Silbenendkonsonanten','Liquide Laute',
+  'Gespannte Plosive ㄲ/ㅃ/ㅉ, Vokal ㅡ','Gespannte Konsonanten',
+  'Endkonsonanten 받침, Tonmuster','Silbenenden',
+  'Vokalänge, Höflichkeitsstufen','Höflichkeitsstufen',
+  'Was enthalten ist','Koreanisch, <em>wie es wirklich gelebt wird</em>',
+  'KI-Aussprache-Coach','Echtzeit-Phonemanalyse, muttersprachspezifisches Feedback.',
+  'K-Drama-Szenarien','Übe echte Gespräche. Lerne 반말 und 존댓말 im Kontext.',
+  'Langzeit-KI-Gedächtnis','Dein Tutor erinnert sich an jede Sitzung — schwache Vokabeln, Aussprache-Lücken, deine Interessen.',
+  'Intelligente SRS-Karten','Vokabeln erscheinen zum richtigen Zeitpunkt. Klang und Bedeutung zusammen lernen.',
+  'K-Pop Hören','Diktat-Modus, Liedtext-Übungen und Aussprache — mit Songs, die du liebst.',
+  'TOPIK-Vorbereitung','Vollständige TOPIK I & II Übungsprüfungen mit detaillierter Schwachstellenanalyse.',
+  'Premium','Kostenlos · 3 Szenen','Kostenlos','Add-on',
+  'Preise','Starte kostenlos.<br><em>Wachse ohne Grenzen.</em>',
+  'Kostenlos','Premium / Monat','Jährlich',
+  'Hangul Master — komplett','1 Lektion pro Tag','KI-Chat · 3 Sitzungen/Tag','Grundlegendes Aussprache-Feedback','Wöchentlicher K-Ausdruck',
+  'Muttersprachliches Coaching','Unbegrenzt KI-Chat','TOPIK-Modus',
+  'Alles in Kostenlos','Muttersprachliche KI-Aussprache','Unbegrenzte KI-Gespräche','Alle Rollenspiel-Szenarien','KI-Schreib-Coach','Erweitertes SRS','KI-Tutor-Gedächtnis','Community-Zugang',
+  'Alles in Premium','Prioritäts-Community-Matching','Fortschrittsbericht PDF','Offline-Lernmodus','Frühzeitiger Zugang zu neuen Funktionen','Keine Werbung für immer',
+  '50% sparen — 5$/Monat','Am beliebtesten','Kostenlos starten','Premium starten','Bestes Preis-Leistungs-Verhältnis',
+  'Add-ons · Einmalkauf','Tauche tiefer in <em>das ein, was du liebst</em>','Einmal kaufen, für immer behalten. Funktioniert mit Kostenlos und Premium.',
+  'Aussprache-Klinik','30-tägiges Intensivtraining für deine schwächsten Phoneme.',
+  'K-Drama-Paket','Vollständige Szenariobibliothek mit verzweigten Dialogen und Höflichkeitsführer.',
+  'TOPIK-Übungsprüfungen','Vollständige TOPIK I & II Übungssets mit Schwachstellen-Tracking.',
+  'Business-Koreanisch','Arbeitsplatz-Szenarien, E-Mail-Vorlagen und Business-Höflichkeiten.',
+  'K-Pop Hören','Liedtext-basiertes Hörtraining mit Diktat-Modus.',
+  'Starter-Bundle','Aussprache-Klinik + K-Drama-Paket + K-Pop Hören.',
+  'Deine Koreanisch-Geschichte<br><em>beginnt heute Nacht</em>','Für immer kostenlos · Keine Kreditkarte · Starte Hangul in 5 Minuten',
+  'Im App Store herunterladen','Android — Warteliste beitreten',
+  'Datenschutz','Nutzungsbedingungen','Support',
+  'Android-Warteliste beitreten','Google Play kommt bald. Erfahre es als Erster.',
+  'Benachrichtigen','Abbrechen','deine@email.de','Sprache wählen'
+]);
+
+T['pt'] = _t([
+  'Aprenda coreano do jeito<br><em>que seu cérebro já funciona</em>',
+  'Dalnara ensina coreano com sua língua nativa em mente — coaching personalizado, cenários de K-Drama e cultura em cada aula.',
+  'Google Play — Me avisar','Grátis para sempre · 25 idiomas · iOS 16+',
+  'Recursos','Preços','Suporte','Baixar',
+  'Aprendizado de coreano com IA · No iOS','App Store',
+  'Feito para você','Sua língua nativa<br>é sua <em>arma secreta</em>',
+  'A maioria dos apps trata todos igual. Dalnara detecta sua língua nativa e mira exatamente nos sons que te travam.',
+  'Japonês','Inglês','Chinês','Vietnamita',
+  'Distinção ㄹ/ㅓ, consoantes finais de sílaba','Sons líquidos',
+  'Oclusivas tensas ㄲ/ㅃ/ㅉ, vogal ㅡ','Consoantes tensas',
+  'Consoantes finais 받침, padrões tonais','Finais silábicos',
+  'Comprimento vocálico, níveis de cortesia','Níveis honoríficos',
+  'O que está incluído','Coreano como é <em>realmente vivido</em>',
+  'Coach de pronúncia IA','Análise fonêmica em tempo real, feedback específico para sua língua.',
+  'Cenários K-Drama','Pratique conversas reais. Aprenda 반말 e 존댓말 em contexto.',
+  'Memória IA de longo prazo','Seu tutor lembra cada sessão — vocabulário fraco, lacunas de pronúncia, seus interesses.',
+  'Flashcards SRS inteligentes','Vocabulário no momento certo. Aprenda som e significado juntos.',
+  'Listening K-Pop','Modo ditado, exercícios de letras e pronúncia — com músicas que você já ama.',
+  'Preparação TOPIK','Simulados completos TOPIK I e II com análise detalhada de pontos fracos.',
+  'Premium','Grátis · 3 cenários','Grátis','Adicional',
+  'Preços','Comece grátis.<br><em>Cresça sem limites.</em>',
+  'Grátis','Premium / mês','Anual',
+  'Hangul Master — completo','1 aula por dia','Chat IA · 3 sessões/dia','Feedback básico de pronúncia','K-Expressão semanal',
+  'Coaching adaptado','Chat IA ilimitado','Modo TOPIK',
+  'Tudo no Grátis','Pronúncia IA adaptada','Conversa IA ilimitada','Todos os cenários de RPG','Coach de escrita IA','SRS avançado','Memória do tutor IA','Acesso à comunidade',
+  'Tudo no Premium','Combinação prioritária na comunidade','Relatório de progresso PDF','Modo offline','Acesso antecipado a novos recursos','Sem anúncios para sempre',
+  'Economize 50% — $5/mês','Mais popular','Começar grátis','Iniciar Premium','Melhor custo-benefício',
+  'Adicionais · Compra única','Aprofunde-se no <em>que você ama</em>','Compre uma vez, mantenha para sempre. Funciona com Grátis e Premium.',
+  'Clínica de pronúncia','Pack intensivo de 30 dias para seus fonemas mais difíceis.',
+  'Pack K-Drama','Biblioteca completa de cenários com diálogos ramificados e guia de tratamentos.',
+  'Simulados TOPIK','Sets completos de prática TOPIK I e II com rastreamento de pontos fracos.',
+  'Coreano de negócios','Cenários profissionais, modelos de e-mail e tratamentos empresariais.',
+  'Listening K-Pop','Prática de escuta baseada em letras com modo ditado.',
+  'Pack inicial','Clínica de pronúncia + Pack K-Drama + Listening K-Pop.',
+  'Sua história em coreano<br><em>começa esta noite</em>','Grátis para sempre · Sem cartão de crédito · Comece Hangul em 5 minutos',
+  'Baixar na App Store','Android — Entrar na lista de espera',
+  'Privacidade','Termos','Suporte',
+  'Entrar na lista de espera Android','Google Play chegando em breve. Seja o primeiro a saber.',
+  'Me avisar','Cancelar','seu@email.com','Escolha seu idioma'
+]);
+
+T['it'] = _t([
+  'Impara il coreano nel modo<br><em>in cui il tuo cervello già funziona</em>',
+  'Dalnara insegna il coreano tenendo conto della tua lingua madre — coaching personalizzato, scenari K-Drama e cultura in ogni lezione.',
+  'Google Play — Avvisami','Gratis per sempre · 25 lingue · iOS 16+',
+  'Funzioni','Prezzi','Supporto','Scarica',
+  'Apprendimento del coreano con IA · Su iOS','App Store',
+  'Fatto per te','La tua lingua madre<br>è la tua <em>arma segreta</em>',
+  'La maggior parte delle app tratta tutti allo stesso modo. Dalnara rileva la tua lingua madre e punta esattamente ai suoni che ti creano difficoltà.',
+  'Giapponese','Inglese','Cinese','Vietnamita',
+  'Distinzione ㄹ/ㅓ, consonanti finali di sillaba','Suoni liquidi',
+  'Occlusive tese ㄲ/ㅃ/ㅉ, vocale ㅡ','Consonanti tese',
+  'Consonanti finali 받침, schemi tonali','Finali sillabiche',
+  'Lunghezza vocalica, livelli di cortesia','Livelli onorifici',
+  'Cosa è incluso','Il coreano come è <em>davvero vissuto</em>',
+  'Coach di pronuncia IA','Analisi fonemica in tempo reale, feedback specifico per la tua lingua.',
+  'Scenari K-Drama','Pratica conversazioni reali. Impara 반말 e 존댓말 in contesto.',
+  'Memoria IA a lungo termine','Il tuo tutor ricorda ogni sessione — vocabolario debole, lacune di pronuncia, i tuoi interessi.',
+  'Flashcard SRS intelligenti','Il vocabolario appare al momento giusto. Impara suono e significato insieme.',
+  'Ascolto K-Pop','Modalità dettato, esercizi sui testi e pronuncia — con canzoni che già ami.',
+  'Preparazione TOPIK','Esami di pratica completi TOPIK I e II con analisi dettagliata dei punti deboli.',
+  'Premium','Gratis · 3 scene','Gratis','Add-on',
+  'Prezzi','Inizia gratis.<br><em>Cresci senza limiti.</em>',
+  'Gratis','Premium / mese','Annuale',
+  'Hangul Master — completo','1 lezione al giorno','Chat IA · 3 sessioni/giorno','Feedback base sulla pronuncia','K-Espressione settimanale',
+  'Coaching adattato','Chat IA illimitata','Modalità TOPIK',
+  'Tutto in Gratis','Pronuncia IA adattata','Conversazione IA illimitata','Tutti gli scenari di gioco di ruolo','Coach di scrittura IA','SRS avanzato','Memoria tutor IA','Accesso community',
+  'Tutto in Premium','Abbinamento community prioritario','Report progresso PDF','Modalità offline','Accesso anticipato a nuove funzioni','Niente pubblicità per sempre',
+  'Risparmia 50% — $5/mese','Più popolare','Inizia gratis','Inizia Premium','Miglior valore',
+  'Add-on · Acquisto unico','Approfondisci <em>ciò che ami</em>','Acquista una volta, tienilo per sempre. Funziona con Gratis e Premium.',
+  'Clinica di pronuncia','Pack intensivo 30 giorni per i tuoi fonemi più difficili.',
+  'Pack K-Drama','Libreria completa di scenari con dialoghi ramificati e guida agli onorifici.',
+  'Esami di pratica TOPIK','Set completi di pratica TOPIK I e II con tracciamento delle debolezze.',
+  'Coreano commerciale','Scenari lavorativi, modelli di email e onorifici aziendali.',
+  'Ascolto K-Pop','Pratica di ascolto basata su testi con modalità dettato.',
+  'Bundle iniziale','Clinica di pronuncia + Pack K-Drama + Ascolto K-Pop.',
+  'La tua storia in coreano<br><em>inizia stasera</em>','Gratis per sempre · Nessuna carta di credito · Inizia Hangul in 5 minuti',
+  'Scarica su App Store','Android — Unisciti alla lista d\'attesa',
+  'Privacy','Termini','Supporto',
+  'Unisciti alla lista d\'attesa Android','Google Play arriva presto. Scoprilo per primo.',
+  'Avvisami','Annulla','tua@email.com','Scegli la tua lingua'
+]);
+
+T['th'] = _t([
+  'เรียนเกาหลีแบบที่<br><em>สมองคุณคุ้นเคย</em>',
+  'Dalnara สอนภาษาเกาหลีโดยคำนึงถึงภาษาแม่ของคุณ — โค้ชการออกเสียงส่วนตัว ฉากจาก K-Drama และวัฒนธรรมในทุกบทเรียน',
+  'Google Play — แจ้งเตือนฉัน','ฟรีตลอดไป · 25 ภาษา · iOS 16+',
+  'ฟีเจอร์','ราคา','ช่วยเหลือ','ดาวน์โหลด',
+  'เรียนภาษาเกาหลีด้วย AI · บน iOS','App Store',
+  'ปรับแต่งสำหรับคุณ','ภาษาแม่ของคุณ<br>คือ<em>อาวุธลับ</em>ของคุณ',
+  'แอปส่วนใหญ่ปฏิบัติกับทุกคนเหมือนกัน Dalnara ตรวจจับภาษาแม่ของคุณและมุ่งเป้าไปที่เสียงที่ทำให้คุณยาก',
+  'ญี่ปุ่น','อังกฤษ','จีน','เวียดนาม',
+  'การแยก ㄹ/ㅓ พยัญชนะท้ายพยางค์','เสียงกักเหลว',
+  'เสียงตึง ㄲ/ㅃ/ㅉ สระ ㅡ','พยัญชนะตึง',
+  'พยัญชนะท้าย 받침 รูปแบบวรรณยุกต์','เสียงท้ายพยางค์',
+  'ความยาวสระ ระดับภาษาสุภาพ','ระดับภาษา',
+  'สิ่งที่รวมอยู่','ภาษาเกาหลี<em>อย่างที่ใช้จริง</em>',
+  'โค้ชออกเสียง AI','วิเคราะห์เสียงแบบ real-time พร้อมข้อเสนอแนะตามภาษาแม่',
+  'ฉาก K-Drama','ฝึกบทสนทนาจริงจากซีรีส์ เรียน 반말 และ 존댓말 ในบริบท',
+  'AI ติวเตอร์มีความจำยาว','ติวเตอร์จำทุกเซสชัน — คำศัพท์อ่อน ช่องว่างการออกเสียง ความสนใจของคุณ',
+  'การ์ด SRS อัจฉริยะ','คำศัพท์ปรากฏในเวลาที่เหมาะสม เรียนเสียงและความหมายพร้อมกัน',
+  'ฟัง K-Pop','โหมดตามเสียง ฝึกเนื้อเพลง และการออกเสียง — กับเพลงที่คุณชอบ',
+  'เตรียม TOPIK','ข้อสอบจำลอง TOPIK I และ II ครบถ้วนพร้อมวิเคราะห์จุดอ่อน',
+  'พรีเมียม','ฟรี · 3 ฉาก','ฟรี','แพ็คเสริม',
+  'ราคา','เริ่มฟรี<br><em>เติบโตไม่มีขีดจำกัด</em>',
+  'ฟรี','พรีเมียม / เดือน','รายปี',
+  'Hangul Master — ฟรีสมบูรณ์','1 บทเรียน/วัน','แชท AI · 3 ครั้ง/วัน','ข้อเสนอแนะการออกเสียงพื้นฐาน','K-สำนวนประจำสัปดาห์',
+  'โค้ชตามภาษาแม่','แชท AI ไม่จำกัด','โหมด TOPIK',
+  'ทุกอย่างในแผนฟรี','ออกเสียง AI ตามภาษาแม่','สนทนา AI ไม่จำกัด','ฉากสวมบทบาททั้งหมด','โค้ชเขียน AI','SRS ขั้นสูง','ความจำ AI','เข้าถึงชุมชน',
+  'ทุกอย่างในพรีเมียม','จับคู่ชุมชนลำดับแรก','รายงานความก้าวหน้า PDF','โหมดออฟไลน์','เข้าถึงฟีเจอร์ก่อนใคร','ไม่มีโฆษณาตลอดไป',
+  'ประหยัด 50% — $5/เดือน','ยอดนิยมที่สุด','เริ่มใช้ฟรี','เริ่มพรีเมียม','คุ้มค่าที่สุด',
+  'แพ็คเสริม · ซื้อครั้งเดียว','ไปให้ลึกกว่านั้นกับ<em>สิ่งที่คุณชอบ</em>','ซื้อครั้งเดียวใช้ตลอดไป ใช้กับแผนฟรีและพรีเมียม',
+  'คลินิกออกเสียง','แพ็ค 30 วันเน้นจุดอ่อนเสียงตามภาษาแม่',
+  'แพ็ค K-Drama','ไลบรารีฉากครบถ้วนพร้อมบทสนทนาแบบแตกสาขาและคู่มือภาษาสุภาพ',
+  'ข้อสอบจำลอง TOPIK','ชุดข้อสอบ TOPIK I และ II ครบถ้วนพร้อมติดตามจุดอ่อน',
+  'เกาหลีธุรกิจ','ฉากในที่ทำงาน แม่แบบอีเมล และภาษาสุภาพทางธุรกิจ',
+  'ฟัง K-Pop','ฝึกฟังผ่านเนื้อเพลงด้วยโหมดตามเสียง',
+  'ชุดเริ่มต้น','คลินิกออกเสียง + แพ็ค K-Drama + ฟัง K-Pop',
+  'เรื่องราวภาษาเกาหลีของคุณ<br><em>เริ่มต้นคืนนี้</em>','ฟรีตลอดไป · ไม่ต้องใช้บัตรเครดิต · เริ่ม Hangul ใน 5 นาที',
+  'ดาวน์โหลดบน App Store','Android — เข้าร่วมรายชื่อรอ',
+  'นโยบายความเป็นส่วนตัว','ข้อกำหนด','ช่วยเหลือ',
+  'เข้าร่วมรายชื่อรอ Android','Google Play กำลังจะมา รับการแจ้งเตือนก่อนใคร',
+  'แจ้งเตือนฉัน','ยกเลิก','อีเมลของคุณ','เลือกภาษา'
+]);
+
+T['id'] = _t([
+  'Belajar Korea dengan cara<br><em>otakmu sudah paham</em>',
+  'Dalnara mengajarkan bahasa Korea dengan mempertimbangkan bahasa ibumu — pelatihan pengucapan personal, skenario K-Drama, dan budaya di setiap pelajaran.',
+  'Google Play — Beritahu saya','Gratis selamanya · 25 bahasa · iOS 16+',
+  'Fitur','Harga','Dukungan','Unduh',
+  'Belajar Bahasa Korea dengan AI · Di iOS','App Store',
+  'Dibuat untuk kamu','Bahasa ibumu<br>adalah <em>senjata rahasiamu</em>',
+  'Kebanyakan aplikasi memperlakukan semua orang sama. Dalnara mengenali bahasa ibumu dan menargetkan tepat bunyi yang menyulitkanmu.',
+  'Jepang','Inggris','Cina','Vietnam',
+  'Perbedaan ㄹ/ㅓ, konsonan akhir suku kata','Bunyi likuid',
+  'Konsonan tegang ㄲ/ㅃ/ㅉ, vokal ㅡ','Konsonan tegang',
+  'Konsonan akhir 받침, pola nada','Akhiran suku kata',
+  'Panjang vokal, tingkat kesopanan','Tingkat hormat',
+  'Apa yang ada di dalamnya','Bahasa Korea seperti yang <em>benar-benar hidup</em>',
+  'Pelatih Pengucapan AI','Analisis fonem real-time, umpan balik khusus bahasa ibu.',
+  'Skenario K-Drama','Latih percakapan nyata. Pelajari 반말 dan 존댓말 dalam konteks.',
+  'Memori AI Jangka Panjang','Tutormu ingat setiap sesi — kosakata lemah, celah pengucapan, minatmu.',
+  'Kartu SRS Cerdas','Kosakata muncul di waktu yang tepat. Pelajari bunyi dan makna bersama.',
+  'Mendengarkan K-Pop','Mode dikte, latihan lirik dan pengucapan — dengan lagu yang kamu suka.',
+  'Persiapan TOPIK','Ujian latihan TOPIK I dan II lengkap dengan analisis kelemahan terperinci.',
+  'Premium','Gratis · 3 skenario','Gratis','Add-on',
+  'Harga','Mulai gratis.<br><em>Berkembang tanpa batas.</em>',
+  'Gratis','Premium / bulan','Tahunan',
+  'Hangul Master — lengkap','1 pelajaran per hari','Chat AI · 3 sesi/hari','Umpan balik pengucapan dasar','K-Ekspresi mingguan',
+  'Pelatihan sesuai bahasa ibu','Chat AI tak terbatas','Mode TOPIK',
+  'Semua di Gratis','Pengucapan AI sesuai bahasa ibu','Percakapan AI tak terbatas','Semua skenario bermain peran','Pelatih menulis AI','SRS lanjutan','Memori tutor AI','Akses komunitas',
+  'Semua di Premium','Pencocokan komunitas prioritas','Laporan kemajuan PDF','Mode belajar offline','Akses awal fitur baru','Tanpa iklan selamanya',
+  'Hemat 50% — $5/bulan','Paling Populer','Mulai gratis','Mulai Premium','Nilai terbaik',
+  'Add-on · Pembelian sekali','Dalami <em>apa yang kamu sukai</em>','Beli sekali, simpan selamanya. Berfungsi dengan Gratis dan Premium.',
+  'Klinik Pengucapan','Paket intensif 30 hari menarget kelemahan fonem spesifik bahasa ibumu.',
+  'Paket K-Drama','Perpustakaan skenario lengkap dengan dialog bercabang dan panduan honorifik.',
+  'Ujian Latihan TOPIK','Set latihan TOPIK I & II lengkap dengan pelacakan kelemahan.',
+  'Bahasa Korea Bisnis','Skenario tempat kerja, template email, dan honorifik bisnis.',
+  'Mendengarkan K-Pop','Latihan mendengar berbasis lirik dengan mode dikte.',
+  'Bundle Pemula','Klinik Pengucapan + Paket K-Drama + Mendengarkan K-Pop.',
+  'Kisah Korea-mu<br><em>dimulai malam ini</em>','Gratis selamanya · Tanpa kartu kredit · Mulai Hangul dalam 5 menit',
+  'Unduh di App Store','Android — Bergabung ke daftar tunggu',
+  'Privasi','Ketentuan','Dukungan',
+  'Bergabung ke daftar tunggu Android','Google Play segera hadir. Jadilah yang pertama tahu.',
+  'Beritahu saya','Batal','email@kamu.com','Pilih bahasa kamu'
+]);
+
+T['ms'] = _t([
+  'Belajar Korea dengan cara<br><em>otak anda sudah faham</em>',
+  'Dalnara mengajar bahasa Korea dengan mengambil kira bahasa ibunda anda — bimbingan sebutan peribadi, senario K-Drama, dan budaya dalam setiap pelajaran.',
+  'Google Play — Beritahu saya','Percuma selama-lamanya · 25 bahasa · iOS 16+',
+  'Ciri','Harga','Sokongan','Muat turun',
+  'Pembelajaran Bahasa Korea AI · Pada iOS','App Store',
+  'Dibuat untuk anda','Bahasa ibunda anda<br>adalah <em>senjata rahsia</em> anda',
+  'Kebanyakan apl melayan semua orang sama. Dalnara mengesan bahasa ibunda anda dan menyasar tepat bunyi yang menyukarkan anda.',
+  'Jepun','Inggeris','Cina','Vietnam',
+  'Perbezaan ㄹ/ㅓ, konsonan akhir suku kata','Bunyi cecair',
+  'Konsonan tegang ㄲ/ㅃ/ㅉ, vokal ㅡ','Konsonan tegang',
+  'Konsonan akhir 받침, corak nada','Akhiran suku kata',
+  'Panjang vokal, tahap kesopanan','Tahap hormat',
+  'Apa yang termasuk','Bahasa Korea seperti yang <em>benar-benar dijalani</em>',
+  'Jurulatih Sebutan AI','Analisis fonem masa nyata, maklum balas khusus bahasa ibunda.',
+  'Senario K-Drama','Latih perbualan sebenar. Pelajari 반말 dan 존댓말 dalam konteks.',
+  'Memori AI Jangka Panjang','Tutor anda ingat setiap sesi — kosa kata lemah, jurang sebutan, minat anda.',
+  'Kad SRS Pintar','Kosa kata muncul pada masa yang tepat. Pelajari bunyi dan makna bersama.',
+  'Mendengar K-Pop','Mod dictation, latihan lirik dan sebutan — dengan lagu yang anda suka.',
+  'Persediaan TOPIK','Peperiksaan latihan TOPIK I dan II lengkap dengan analisis kelemahan.',
+  'Premium','Percuma · 3 senario','Percuma','Tambahan',
+  'Harga','Mulakan percuma.<br><em>Berkembang tanpa had.</em>',
+  'Percuma','Premium / bulan','Tahunan',
+  'Hangul Master — lengkap','1 pelajaran sehari','Chat AI · 3 sesi/hari','Maklum balas sebutan asas','K-Ekspresi mingguan',
+  'Bimbingan mengikut bahasa ibunda','Chat AI tidak terhad','Mod TOPIK',
+  'Semua dalam Percuma','Sebutan AI mengikut bahasa ibunda','Perbualan AI tidak terhad','Semua senario main peranan','Jurulatih penulisan AI','SRS lanjutan','Memori tutor AI','Akses komuniti',
+  'Semua dalam Premium','Pemadanan komuniti keutamaan','Laporan kemajuan PDF','Mod pembelajaran luar talian','Akses awal ciri baharu','Tanpa iklan selama-lamanya',
+  'Jimat 50% — $5/bulan','Paling popular','Mulakan percuma','Mulakan Premium','Nilai terbaik',
+  'Tambahan · Pembelian sekali','Mendalami <em>apa yang anda sukai</em>','Beli sekali, simpan selama-lamanya. Berfungsi dengan Percuma dan Premium.',
+  'Klinik Sebutan','Pakej intensif 30 hari menyasar kelemahan fonem mengikut bahasa ibunda.',
+  'Pakej K-Drama','Perpustakaan senario lengkap dengan dialog bercabang dan panduan hormat.',
+  'Peperiksaan Latihan TOPIK','Set latihan TOPIK I & II lengkap dengan penjejakan kelemahan.',
+  'Bahasa Korea Perniagaan','Senario tempat kerja, templat e-mel dan hormat perniagaan.',
+  'Mendengar K-Pop','Latihan mendengar berasaskan lirik dengan mod dictation.',
+  'Bundle Pemula','Klinik Sebutan + Pakej K-Drama + Mendengar K-Pop.',
+  'Kisah Korea anda<br><em>bermula malam ini</em>','Percuma selama-lamanya · Tanpa kad kredit · Mulai Hangul dalam 5 minit',
+  'Muat turun di App Store','Android — Sertai senarai tunggu',
+  'Privasi','Terma','Sokongan',
+  'Sertai senarai tunggu Android','Google Play akan datang tidak lama lagi. Jadilah yang pertama tahu.',
+  'Beritahu saya','Batal','email@anda.com','Pilih bahasa anda'
+]);
+
+T['ar'] = _t([
+  'تعلم الكورية بالطريقة<br><em>التي يفهمها عقلك</em>',
+  'يعلمك Dalnara الكورية مع مراعاة لغتك الأم — تدريب النطق الشخصي وسيناريوهات K-Drama والثقافة في كل درس.',
+  'Google Play — أخبرني','مجاني للأبد · 25 لغة · iOS 16+',
+  'الميزات','الأسعار','الدعم','تحميل',
+  'تعلم الكورية بالذكاء الاصطناعي · على iOS','App Store',
+  'مصمم لك','لغتك الأم<br>هي <em>سلاحك السري</em>',
+  'معظم التطبيقات تعامل الجميع بالتساوي. Dalnara يكتشف لغتك الأم ويستهدف بدقة الأصوات التي تسبب لك صعوبة.',
+  'اليابانية','الإنجليزية','الصينية','الفيتنامية',
+  'تمييز ㄹ/ㅓ، صوامت نهاية المقطع','أصوات سائلة',
+  'انفجاريات مشددة ㄲ/ㅃ/ㅉ، صائت ㅡ','صوامت مشددة',
+  'صوامت نهاية 받침، أنماط نغمية','نهايات مقطعية',
+  'طول الصائت، مستويات الاحترام','مستويات الاحترام',
+  'ما يتضمنه','الكورية كما هي <em>تُعاش فعلاً</em>',
+  'مدرب النطق بالذكاء الاصطناعي','تحليل صوتي في الوقت الفعلي، ملاحظات خاصة بلغتك.',
+  'سيناريوهات K-Drama','تدرب على محادثات حقيقية. تعلم 반말 و 존댓말 في السياق.',
+  'ذاكرة AI طويلة الأمد','يتذكر مدرسك كل جلسة — مفردات ضعيفة، فجوات النطق، اهتماماتك.',
+  'بطاقات SRS الذكية','المفردات تظهر في اللحظة المناسبة. تعلم الصوت والمعنى معاً.',
+  'الاستماع لـ K-Pop','وضع الإملاء، تمارين الكلمات والنطق — مع أغاني تحبها.',
+  'التحضير لـ TOPIK','امتحانات تجريبية كاملة لـ TOPIK I و II مع تحليل الضعف.',
+  'بريميوم','مجاني · 3 مشاهد','مجاني','إضافة',
+  'الأسعار','ابدأ مجاناً.<br><em>انمُ بلا حدود.</em>',
+  'مجاني','بريميوم / شهر','سنوي',
+  'Hangul Master — كامل','درس واحد يومياً','محادثة AI · 3 جلسات/يوم','ملاحظات نطق أساسية','K-تعبير أسبوعي',
+  'تدريب حسب اللغة الأم','محادثة AI غير محدودة','وضع TOPIK',
+  'كل شيء في المجاني','نطق AI حسب اللغة الأم','محادثة AI غير محدودة','جميع سيناريوهات لعب الأدوار','مدرب الكتابة AI','SRS متقدم','ذاكرة مدرس AI','الوصول إلى المجتمع',
+  'كل شيء في البريميوم','مطابقة المجتمع ذات الأولوية','تقرير التقدم PDF','وضع التعلم دون اتصال','وصول مبكر للميزات الجديدة','بدون إعلانات للأبد',
+  'وفر 50% — 5$/شهر','الأكثر شعبية','ابدأ مجاناً','ابدأ البريميوم','أفضل قيمة',
+  'إضافات · شراء مرة واحدة','تعمق أكثر في <em>ما تحبه</em>','اشتر مرة، احتفظ بها للأبد. يعمل مع المجاني والبريميوم.',
+  'عيادة النطق','حزمة مكثفة 30 يوماً تستهدف ضعف الصوتيات حسب لغتك.',
+  'حزمة K-Drama','مكتبة سيناريوهات كاملة مع حوارات متفرعة ودليل التحكيم.',
+  'امتحانات TOPIK التجريبية','مجموعات تدريب كاملة TOPIK I و II مع تتبع الضعف.',
+  'الكورية للأعمال','سيناريوهات مكان العمل، قوالب البريد الإلكتروني والتحكيم التجاري.',
+  'الاستماع لـ K-Pop','تدريب استماع قائم على الكلمات مع وضع الإملاء.',
+  'حزمة المبتدئين','عيادة النطق + حزمة K-Drama + الاستماع لـ K-Pop.',
+  'قصتك في الكورية<br><em>تبدأ الليلة</em>','مجاني للأبد · لا بطاقة ائتمان · ابدأ Hangul في 5 دقائق',
+  'حمّل على App Store','Android — انضم لقائمة الانتظار',
+  'الخصوصية','الشروط','الدعم',
+  'انضم لقائمة انتظار Android','Google Play قادم قريباً. كن أول من يعلم.',
+  'أخبرني','إلغاء','بريدك@الإلكتروني.com','اختر لغتك'
+]);
+
+T['hi'] = _t([
+  'कोरियाई उस तरह सीखें<br><em>जैसे आपका दिमाग काम करता है</em>',
+  'Dalnara आपकी मातृभाषा को ध्यान में रखते हुए कोरियाई सिखाता है — व्यक्तिगत उच्चारण कोचिंग, K-Drama परिदृश्य और हर पाठ में संस्कृति।',
+  'Google Play — मुझे सूचित करें','हमेशा मुफ्त · 25 भाषाएं · iOS 16+',
+  'सुविधाएं','मूल्य','सहायता','डाउनलोड',
+  'AI से कोरियाई सीखें · iOS पर','App Store',
+  'आपके लिए बनाया गया','आपकी मातृभाषा<br>आपका <em>गुप्त हथियार</em> है',
+  'अधिकांश ऐप सभी के साथ एक जैसा व्यवहार करते हैं। Dalnara आपकी मातृभाषा पहचानता है और उन ध्वनियों को लक्षित करता है जो आपको कठिन लगती हैं।',
+  'जापानी','अंग्रेजी','चीनी','वियतनामी',
+  'ㄹ/ㅓ भेद, अंतिम व्यंजन','तरल ध्वनियां',
+  'ㄲ/ㅃ/ㅉ तनाव स्टॉप, ㅡ स्वर','तनाव व्यंजन',
+  '받침 अंतिम व्यंजन, स्वर पैटर्न','अक्षर अंत',
+  'स्वर लंबाई, सम्मान स्तर','सम्मान स्तर',
+  'क्या शामिल है','कोरियाई जैसा <em>वास्तव में जिया जाता है</em>',
+  'AI उच्चारण कोच','रियल-टाइम ध्वनि विश्लेषण, आपकी मातृभाषा के अनुसार फीडबैक।',
+  'K-Drama परिदृश्य','वास्तविक बातचीत का अभ्यास करें। 반말 और 존댓말 संदर्भ में सीखें।',
+  'दीर्घकालिक AI स्मृति','आपका ट्यूटर हर सत्र याद रखता है — कमजोर शब्दावली, उच्चारण अंतराल, आपकी रुचियां।',
+  'स्मार्ट SRS फ्लैशकार्ड','शब्दावली सही समय पर आती है। ध्वनि और अर्थ एक साथ सीखें।',
+  'K-Pop सुनना','श्रुतलेख मोड, गीत अभ्यास और उच्चारण — उन गानों के साथ जो आप पसंद करते हैं।',
+  'TOPIK तैयारी','TOPIK I और II के पूर्ण मॉक परीक्षण विस्तृत कमजोरी विश्लेषण के साथ।',
+  'प्रीमियम','मुफ्त · 3 दृश्य','मुफ्त','ऐड-ऑन',
+  'मूल्य','मुफ्त शुरू करें।<br><em>बिना सीमा के बढ़ें।</em>',
+  'मुफ्त','प्रीमियम / माह','वार्षिक',
+  'Hangul Master — पूर्ण','1 पाठ प्रति दिन','AI चैट · 3 सत्र/दिन','बुनियादी उच्चारण फीडबैक','साप्ताहिक K-अभिव्यक्ति',
+  'मातृभाषा कोचिंग','असीमित AI चैट','TOPIK मोड',
+  'मुफ्त में सब कुछ','मातृभाषा AI उच्चारण','असीमित AI वार्तालाप','सभी रोलप्ले परिदृश्य','AI लेखन कोच','उन्नत SRS','AI ट्यूटर स्मृति','समुदाय पहुंच',
+  'प्रीमियम में सब कुछ','प्राथमिकता समुदाय मिलान','प्रगति रिपोर्ट PDF','ऑफलाइन शिक्षण मोड','नई सुविधाओं तक जल्दी पहुंच','हमेशा के लिए कोई विज्ञापन नहीं',
+  '50% बचाएं — $5/माह','सबसे लोकप्रिय','मुफ्त शुरू करें','प्रीमियम शुरू करें','सर्वोत्तम मूल्य',
+  'ऐड-ऑन · एकमुश्त खरीद','<em>जो आप पसंद करते हैं</em> उसमें गहरे जाएं','एक बार खरीदें, हमेशा रखें। मुफ्त और प्रीमियम के साथ काम करता है।',
+  'उच्चारण क्लिनिक','आपकी मातृभाषा के अनुसार ध्वनि कमजोरियों के लिए 30-दिन का गहन पैक।',
+  'K-Drama पैक','शाखित संवाद और सम्मान गाइड के साथ पूर्ण परिदृश्य पुस्तकालय।',
+  'TOPIK मॉक परीक्षा','कमजोरी ट्रैकिंग के साथ पूर्ण TOPIK I और II अभ्यास सेट।',
+  'व्यापार कोरियाई','कार्यस्थल परिदृश्य, ईमेल टेम्पलेट और व्यावसायिक शिष्टाचार।',
+  'K-Pop सुनना','श्रुतलेख मोड और उच्चारण अभ्यास के साथ गीत आधारित सुनने का अभ्यास।',
+  'स्टार्टर बंडल','उच्चारण क्लिनिक + K-Drama पैक + K-Pop सुनना।',
+  'आपकी कोरियाई कहानी<br><em>आज रात शुरू होती है</em>','हमेशा मुफ्त · क्रेडिट कार्ड की जरूरत नहीं · 5 मिनट में Hangul शुरू करें',
+  'App Store पर डाउनलोड करें','Android — प्रतीक्षा सूची में शामिल हों',
+  'गोपनीयता','शर्तें','सहायता',
+  'Android प्रतीक्षा सूची में शामिल हों','Google Play जल्द आ रहा है। पहले जानें।',
+  'मुझे सूचित करें','रद्द करें','आपका@ईमेल.com','अपनी भाषा चुनें'
+]);
+
+T['bn'] = _t([
+  'কোরিয়ান শিখুন সেভাবে<br><em>যেভাবে আপনার মস্তিষ্ক ভাবে</em>',
+  'Dalnara আপনার মাতৃভাষাকে মাথায় রেখে কোরিয়ান শেখায় — ব্যক্তিগত উচ্চারণ কোচিং, K-Drama পরিস্থিতি এবং প্রতিটি পাঠে সংস্কৃতি।',
+  'Google Play — আমাকে জানান','চিরকাল বিনামূল্যে · ২৫টি ভাষা · iOS 16+',
+  'বৈশিষ্ট্য','মূল্য','সহায়তা','ডাউনলোড',
+  'AI দিয়ে কোরিয়ান শিক্ষা · iOS-এ','App Store',
+  'আপনার জন্য তৈরি','আপনার মাতৃভাষা<br>আপনার <em>গোপন অস্ত্র</em>',
+  'বেশিরভাগ অ্যাপ সবার সাথে একই আচরণ করে। Dalnara আপনার মাতৃভাষা চিহ্নিত করে এবং আপনাকে কঠিন লাগে এমন শব্দগুলো টার্গেট করে।',
+  'জাপানি','ইংরেজি','চীনা','ভিয়েতনামি',
+  'ㄹ/ㅓ পার্থক্য, শেষ ব্যঞ্জনধ্বনি','তরল ধ্বনি',
+  'ㄲ/ㅃ/ㅉ টান্ট স্টপ, ㅡ স্বরধ্বনি','টান্ট ব্যঞ্জন',
+  '받침 চূড়ান্ত ব্যঞ্জন, সুর প্যাটার্ন','শ্বাসাঘাত',
+  'স্বরধ্বনির দৈর্ঘ্য, সম্মানের মাত্রা','সম্মান মাত্রা',
+  'কী অন্তর্ভুক্ত','কোরিয়ান যেভাবে <em>সত্যিই বাঁচা হয়</em>',
+  'AI উচ্চারণ কোচ','রিয়েল-টাইম ফোনেম বিশ্লেষণ, মাতৃভাষা অনুযায়ী ফিডব্যাক।',
+  'K-Drama পরিস্থিতি','বাস্তব কথোপকথন অনুশীলন করুন। প্রসঙ্গে 반말 এবং 존댓말 শিখুন।',
+  'দীর্ঘমেয়াদী AI স্মৃতি','আপনার টিউটর প্রতিটি সেশন মনে রাখে — দুর্বল শব্দভান্ডার, উচ্চারণের ফাঁক, আপনার আগ্রহ।',
+  'স্মার্ট SRS ফ্ল্যাশকার্ড','সঠিক সময়ে শব্দভান্ডার আসে। একসাথে শব্দ ও অর্থ শিখুন।',
+  'K-Pop শোনা','ডিকটেশন মোড, গানের কথা চর্চা এবং উচ্চারণ — পছন্দের গান দিয়ে।',
+  'TOPIK প্রস্তুতি','বিস্তারিত দুর্বলতা বিশ্লেষণসহ সম্পূর্ণ TOPIK I & II মক পরীক্ষা।',
+  'প্রিমিয়াম','বিনামূল্যে · ৩টি দৃশ্য','বিনামূল্যে','অ্যাড-অন',
+  'মূল্য','বিনামূল্যে শুরু করুন।<br><em>সীমা ছাড়া বাড়ুন।</em>',
+  'বিনামূল্যে','প্রিমিয়াম / মাস','বার্ষিক',
+  'Hangul Master — সম্পূর্ণ','প্রতিদিন ১টি পাঠ','AI চ্যাট · ৩ সেশন/দিন','বেসিক উচ্চারণ ফিডব্যাক','সাপ্তাহিক K-প্রকাশ',
+  'মাতৃভাষা অনুযায়ী কোচিং','সীমাহীন AI চ্যাট','TOPIK মোড',
+  'বিনামূল্যের সবকিছু','মাতৃভাষা AI উচ্চারণ','সীমাহীন AI কথোপকথন','সমস্ত রোলপ্লে পরিস্থিতি','AI লেখা কোচ','উন্নত SRS','AI টিউটর স্মৃতি','কমিউনিটি অ্যাক্সেস',
+  'প্রিমিয়ামের সবকিছু','অগ্রাধিকার কমিউনিটি মিলিয়ে দেওয়া','অগ্রগতি রিপোর্ট PDF','অফলাইন শেখার মোড','নতুন ফিচারে আর্লি অ্যাক্সেস','চিরকালের জন্য কোনো বিজ্ঞাপন নেই',
+  '৫০% সাশ্রয় — $৫/মাস','সবচেয়ে জনপ্রিয়','বিনামূল্যে শুরু করুন','প্রিমিয়াম শুরু করুন','সর্বোত্তম মূল্য',
+  'অ্যাড-অন · এককালীন ক্রয়','<em>যা ভালোবাসেন</em> তাতে গভীরে যান','একবার কিনুন, চিরকাল রাখুন। বিনামূল্যে ও প্রিমিয়াম উভয়ের সাথে কাজ করে।',
+  'উচ্চারণ ক্লিনিক','আপনার মাতৃভাষার নির্দিষ্ট ফোনেম দুর্বলতার জন্য ৩০-দিনের নিবিড় প্যাক।',
+  'K-Drama প্যাক','ব্রাঞ্চিং ডায়ালগ ও সম্মান গাইডসহ সম্পূর্ণ পরিস্থিতি লাইব্রেরি।',
+  'TOPIK মক পরীক্ষা','দুর্বলতা ট্র্যাকিংসহ সম্পূর্ণ TOPIK I & II অনুশীলন সেট।',
+  'বিজনেস কোরিয়ান','কর্মক্ষেত্রের পরিস্থিতি, ইমেইল টেমপ্লেট এবং ব্যবসায়িক সম্মান।',
+  'K-Pop শোনা','ডিকটেশন মোডসহ গানের কথা ভিত্তিক শ্রবণ অনুশীলন।',
+  'স্টার্টার বান্ডেল','উচ্চারণ ক্লিনিক + K-Drama প্যাক + K-Pop শোনা।',
+  'আপনার কোরিয়ান গল্প<br><em>আজ রাতে শুরু হয়</em>','চিরকাল বিনামূল্যে · ক্রেডিট কার্ড নেই · ৫ মিনিটে Hangul শুরু করুন',
+  'App Store-এ ডাউনলোড করুন','Android — অপেক্ষা তালিকায় যোগ দিন',
+  'গোপনীয়তা','শর্তাবলী','সহায়তা',
+  'Android অপেক্ষা তালিকায় যোগ দিন','Google Play শীঘ্রই আসছে। প্রথমে জানুন।',
+  'আমাকে জানান','বাতিল','আপনার@ইমেইল.com','আপনার ভাষা বেছে নিন'
+]);
+
+T['tr'] = _t([
+  'Korece\'yi beyninin<br><em>zaten düşündüğü şekilde</em> öğren',
+  'Dalnara, ana dilinizi göz önünde bulundurarak Korece öğretiyor — kişiselleştirilmiş telaffuz koçluğu, K-Drama senaryoları ve her derste kültür.',
+  'Google Play — Beni bildir','Sonsuza kadar ücretsiz · 25 dil · iOS 16+',
+  'Özellikler','Fiyatlar','Destek','İndir',
+  'AI ile Korece Öğrenimi · iOS\'ta','App Store',
+  'Senin için yapıldı','Ana dilin<br>senin <em>gizli silahın</em>',
+  'Çoğu uygulama herkese aynı davranır. Dalnara ana dilini tespit eder ve tam olarak sana zor gelen sesleri hedef alır.',
+  'Japonca','İngilizce','Çince','Vietnamca',
+  'ㄹ/ㅓ ayrımı, hece sonu ünsüzleri','Akıcı sesler',
+  'ㄲ/ㅃ/ㅉ gergili kapantılar, ㅡ ünlüsü','Gergili ünsüzler',
+  '받침 son ünsüzler, ton kalıpları','Hece sonları',
+  'Ünlü uzunluğu, saygı seviyeleri','Saygı seviyeleri',
+  'İçinde ne var','Korece <em>gerçekten yaşandığı</em> gibi',
+  'AI Telaffuz Koçu','Gerçek zamanlı fonem analizi, ana dilinize özel geri bildirim.',
+  'K-Drama Senaryoları','Gerçek diyalogları pratik yap. 반말 ve 존댓말\'ı bağlamda öğren.',
+  'Uzun Vadeli AI Hafızası','Öğretmenin her oturumu hatırlar — zayıf kelimeler, telaffuz boşlukları, ilgi alanların.',
+  'Akıllı SRS Kartları','Kelimeler tam doğru anda karşına çıkar. Sesi ve anlamı birlikte öğren.',
+  'K-Pop Dinleme','Dikte modu, şarkı sözü alıştırmaları ve telaffuz — sevdiğin şarkılarla.',
+  'TOPIK Hazırlığı','Ayrıntılı zayıflık analiziyle tam TOPIK I ve II pratik sınavları.',
+  'Premium','Ücretsiz · 3 sahne','Ücretsiz','Eklenti',
+  'Fiyatlar','Ücretsiz başla.<br><em>Sınırsız büyü.</em>',
+  'Ücretsiz','Premium / ay','Yıllık',
+  'Hangul Master — eksiksiz','Günde 1 ders','AI sohbet · 3 oturum/gün','Temel telaffuz geri bildirimi','Haftalık K-İfade',
+  'Ana dile göre koçluk','Sınırsız AI sohbet','TOPIK modu',
+  'Ücretsiz\'deki her şey','Ana dile göre AI telaffuzu','Sınırsız AI konuşma','Tüm rol yapma senaryoları','AI yazma koçu','Gelişmiş SRS','AI öğretmen hafızası','Topluluk erişimi',
+  'Premium\'daki her şey','Öncelikli topluluk eşleştirme','İlerleme raporu PDF','Çevrimdışı öğrenme modu','Yeni özelliklere erken erişim','Sonsuza kadar reklamsız',
+  '%50 tasarruf — $5/ay','En popüler','Ücretsiz başla','Premium\'ı başlat','En iyi değer',
+  'Eklentiler · Tek seferlik satın alma','<em>Sevdiğin şeylere</em> daha derin dal','Bir kez satın al, sonsuza kadar sahip ol. Ücretsiz ve Premium ile çalışır.',
+  'Telaffuz Kliniği','Ana diline göre fonem zayıflıklarını hedefleyen 30 günlük yoğun paket.',
+  'K-Drama Paketi','Dallanan diyaloglar ve saygı rehberiyle eksiksiz senaryo kütüphanesi.',
+  'TOPIK Deneme Sınavları','Zayıflık takibiyle eksiksiz TOPIK I & II pratik setleri.',
+  'İş Korece\'si','İş yeri senaryoları, e-posta şablonları ve iş saygı ifadeleri.',
+  'K-Pop Dinleme','Dikte moduyla şarkı sözü tabanlı dinleme pratiği.',
+  'Başlangıç Paketi','Telaffuz Kliniği + K-Drama Paketi + K-Pop Dinleme.',
+  'Korece hikayeniz<br><em>bu gece başlıyor</em>','Sonsuza kadar ücretsiz · Kredi kartı gerekmez · 5 dakikada Hangul\'a başla',
+  'App Store\'dan indir','Android — Bekleme listesine katıl',
+  'Gizlilik','Şartlar','Destek',
+  'Android bekleme listesine katıl','Google Play yakında geliyor. İlk sen öğren.',
+  'Beni bildir','İptal','senin@email.com','Dilini seç'
+]);
+
+T['ru'] = _t([
+  'Учи корейский так,<br><em>как работает твой мозг</em>',
+  'Dalnara учит корейскому с учётом твоего родного языка — персональный коучинг произношения, сценарии K-Drama и культура в каждом уроке.',
+  'Google Play — Уведомить меня','Бесплатно навсегда · 25 языков · iOS 16+',
+  'Функции','Цены','Поддержка','Скачать',
+  'Изучение корейского с ИИ · На iOS','App Store',
+  'Создано для тебя','Твой родной язык —<br>это твоё <em>секретное оружие</em>',
+  'Большинство приложений одинаково обращаются со всеми. Dalnara определяет твой родной язык и точно нацеливается на звуки, которые тебе даются сложнее всего.',
+  'Японский','Английский','Китайский','Вьетнамский',
+  'Различение ㄹ/ㅓ, конечные согласные','Плавные звуки',
+  'Напряжённые смычные ㄲ/ㅃ/ㅉ, гласная ㅡ','Напряжённые согласные',
+  'Конечные согласные 받침, тональные паттерны','Слоговые окончания',
+  'Длина гласных, уровни вежливости','Уровни вежливости',
+  'Что включено','Корейский как его <em>на самом деле живут</em>',
+  'ИИ-тренер по произношению','Фонемный анализ в реальном времени, обратная связь с учётом родного языка.',
+  'Сценарии K-Drama','Практикуй настоящие диалоги. Учи 반말 и 존댓말 в контексте.',
+  'Долгосрочная память ИИ','Твой репетитор помнит каждое занятие — слабую лексику, пробелы в произношении, твои интересы.',
+  'Умные карточки SRS','Слова появляются в нужный момент. Учи звук и смысл вместе.',
+  'Прослушивание K-Pop','Режим диктанта, упражнения по текстам и произношение — с любимыми песнями.',
+  'Подготовка к TOPIK','Полные пробные экзамены TOPIK I и II с детальным анализом слабостей.',
+  'Премиум','Бесплатно · 3 сцены','Бесплатно','Дополнение',
+  'Цены','Начни бесплатно.<br><em>Расти без ограничений.</em>',
+  'Бесплатно','Премиум / месяц','Годовой',
+  'Hangul Master — полный','1 урок в день','ИИ-чат · 3 сессии/день','Базовая обратная связь по произношению','Еженедельное K-выражение',
+  'Коучинг по родному языку','Неограниченный ИИ-чат','Режим TOPIK',
+  'Всё из Бесплатного','ИИ-произношение по родному языку','Неограниченный ИИ-разговор','Все ролевые сценарии','ИИ-тренер по письму','Продвинутая SRS','Память ИИ-репетитора','Доступ к сообществу',
+  'Всё из Премиума','Приоритетный подбор в сообществе','PDF-отчёт о прогрессе','Режим офлайн-обучения','Ранний доступ к новым функциям','Без рекламы навсегда',
+  'Экономия 50% — $5/месяц','Самый популярный','Начать бесплатно','Начать Премиум','Лучшее соотношение',
+  'Дополнения · Единоразовая покупка','Погрузись глубже в <em>то, что любишь</em>','Купи один раз, пользуйся навсегда. Работает с Бесплатным и Премиумом.',
+  'Клиника произношения','30-дневный интенсивный пакет для твоих фонетических слабостей.',
+  'Пакет K-Drama','Полная библиотека сценариев с разветвлёнными диалогами и руководством по формам вежливости.',
+  'Пробные экзамены TOPIK','Полные практические наборы TOPIK I и II с отслеживанием слабостей.',
+  'Деловой корейский','Рабочие сценарии, шаблоны писем и деловые формы вежливости.',
+  'Прослушивание K-Pop','Практика на основе текстов с режимом диктанта.',
+  'Стартовый пакет','Клиника произношения + Пакет K-Drama + Прослушивание K-Pop.',
+  'Твоя история на корейском<br><em>начинается сегодня ночью</em>','Бесплатно навсегда · Без кредитной карты · Начни Hangul за 5 минут',
+  'Скачать в App Store','Android — Присоединиться к списку ожидания',
+  'Конфиденциальность','Условия','Поддержка',
+  'Присоединиться к списку ожидания Android','Google Play скоро будет. Узнай первым.',
+  'Уведомить меня','Отмена','твой@email.com','Выбери язык'
+]);
+
+// pl, nl, sv, uk, ro, cs — extend English with key UI strings
+['pl','nl','sv','uk','ro','cs'].forEach(code => {
+  const overrides = {
+    pl:{ hero_title:'Ucz się koreańskiego tak,<br><em>jak myśli twój mózg</em>', btn_android:'Google Play — Powiadom mnie', nav_features:'Funkcje', nav_pricing:'Cennik', nav_support:'Wsparcie', nav_cta:'Pobierz', tier_free:'Bezpłatny', btn_free:'Zacznij bezpłatnie', btn_premium:'Zacznij Premium', annual_save:'Oszczędź 50% — 5$/mies.', pill_popular:'Najpopularniejszy', footer_privacy:'Prywatność', footer_terms:'Regulamin', footer_support:'Wsparcie', waitlist_btn:'Powiadom mnie', waitlist_cancel:'Anuluj', lang_select_title:'Wybierz język', hero_proof:'Bezpłatnie na zawsze · 25 języków · iOS 16+', email_placeholder:'twój@email.com', cta_btn_android:'Android — Dołącz do listy' },
+    nl:{ hero_title:'Leer Koreaans op de manier<br><em>waarop jouw brein al denkt</em>', btn_android:'Google Play — Meld me aan', nav_features:'Functies', nav_pricing:'Prijzen', nav_support:'Ondersteuning', nav_cta:'Downloaden', tier_free:'Gratis', btn_free:'Gratis beginnen', btn_premium:'Premium starten', annual_save:'50% besparen — $5/maand', pill_popular:'Meest populair', footer_privacy:'Privacy', footer_terms:'Voorwaarden', footer_support:'Ondersteuning', waitlist_btn:'Meld me aan', waitlist_cancel:'Annuleren', lang_select_title:'Kies je taal', hero_proof:'Altijd gratis · 25 talen · iOS 16+', email_placeholder:'jouw@email.com', cta_btn_android:'Android — Aanmelden' },
+    sv:{ hero_title:'Lär dig koreanska på det sätt<br><em>som din hjärna redan tänker</em>', btn_android:'Google Play — Meddela mig', nav_features:'Funktioner', nav_pricing:'Priser', nav_support:'Support', nav_cta:'Ladda ner', tier_free:'Gratis', btn_free:'Börja gratis', btn_premium:'Starta Premium', annual_save:'Spara 50% — $5/mån', pill_popular:'Mest populär', footer_privacy:'Integritet', footer_terms:'Villkor', footer_support:'Support', waitlist_btn:'Meddela mig', waitlist_cancel:'Avbryt', lang_select_title:'Välj ditt språk', hero_proof:'Gratis för alltid · 25 språk · iOS 16+', email_placeholder:'din@email.com', cta_btn_android:'Android — Gå med i listan' },
+    uk:{ hero_title:'Вчи корейську так,<br><em>як працює твій мозок</em>', btn_android:'Google Play — Повідомити мене', nav_features:'Функції', nav_pricing:'Ціни', nav_support:'Підтримка', nav_cta:'Завантажити', tier_free:'Безкоштовно', btn_free:'Почати безкоштовно', btn_premium:'Почати Преміум', annual_save:'Економія 50% — $5/міс', pill_popular:'Найпопулярніший', footer_privacy:'Конфіденційність', footer_terms:'Умови', footer_support:'Підтримка', waitlist_btn:'Повідомити мене', waitlist_cancel:'Скасувати', lang_select_title:'Обери мову', hero_proof:'Безкоштовно назавжди · 25 мов · iOS 16+', email_placeholder:'твій@email.com', cta_btn_android:'Android — Приєднатися' },
+    ro:{ hero_title:'Învață coreeana în modul<br><em>în care gândește mintea ta</em>', btn_android:'Google Play — Anunțați-mă', nav_features:'Funcții', nav_pricing:'Prețuri', nav_support:'Suport', nav_cta:'Descarcă', tier_free:'Gratuit', btn_free:'Începe gratuit', btn_premium:'Începe Premium', annual_save:'Economisești 50% — $5/lună', pill_popular:'Cel mai popular', footer_privacy:'Confidențialitate', footer_terms:'Termeni', footer_support:'Suport', waitlist_btn:'Anunțați-mă', waitlist_cancel:'Anulează', lang_select_title:'Alege limba ta', hero_proof:'Gratuit pentru totdeauna · 25 limbi · iOS 16+', email_placeholder:'email@tau.com', cta_btn_android:'Android — Înscrie-te' },
+    cs:{ hero_title:'Uč se korejsky tak,<br><em>jak přemýšlí tvůj mozek</em>', btn_android:'Google Play — Upozornit mě', nav_features:'Funkce', nav_pricing:'Ceny', nav_support:'Podpora', nav_cta:'Stáhnout', tier_free:'Zdarma', btn_free:'Začít zdarma', btn_premium:'Spustit Premium', annual_save:'Ušetři 50% — $5/měs', pill_popular:'Nejoblíbenější', footer_privacy:'Soukromí', footer_terms:'Podmínky', footer_support:'Podpora', waitlist_btn:'Upozornit mě', waitlist_cancel:'Zrušit', lang_select_title:'Vyberte jazyk', hero_proof:'Zdarma navždy · 25 jazyků · iOS 16+', email_placeholder:'váš@email.com', cta_btn_android:'Android — Připojit se' },
+  };
+  T[code] = {...T['en'], ...overrides[code]};
+});
+
+// ── LOOKUP ─────────────────────────────────────────────────────────────────────
+const getLang = (lang) => T[lang] || T['en'];
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentLang = 'en';
 
 function applyLang(lang) {
-  const t = T[lang] || T.en;
-  const body = document.body;
+  currentLang = lang;
+  const t = getLang(lang);
+  const isRTL = ['ar','he','ur','fa'].includes(lang);
+  document.documentElement.lang = lang.replace('-','_');
+  document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
 
-  // remove all lang classes
-  body.className = body.className.replace(/lang-\w+/g,'').trim();
-  body.classList.add('lang-' + lang);
-
-  // update html lang
-  document.documentElement.lang = lang;
-
-  // apply texts
-  const set = (id, html) => {
-    const el = document.getElementById(id);
-    if(el) el.innerHTML = html;
-  };
-
-  set('heroAppName', t.heroAppName);
-  set('heroTitle', t.heroTitle);
-  set('heroSubtitle', t.heroSubtitle);
-  set('ctaPrimary', t.ctaPrimary);
-  set('ctaLearn', t.ctaLearn);
-  set('sajuLabel', t.sajuLabel);
-  set('sajuTitle', t.sajuTitle);
-  set('sajuIntro', t.sajuIntro);
-  set('p1label', t.p1label); set('p1name', t.p1name); set('p1desc', t.p1desc);
-  set('p2label', t.p2label); set('p2name', t.p2name); set('p2desc', t.p2desc);
-  set('p3label', t.p3label); set('p3name', t.p3name); set('p3desc', t.p3desc);
-  set('p4label', t.p4label); set('p4name', t.p4name); set('p4desc', t.p4desc);
-  set('ohaengLabel', t.ohaengLabel); set('ohaengDesc', t.ohaengDesc);
-  set('vsLabel', t.vsLabel); set('vsTitle', t.vsTitle);
-  set('saName', t.saName); set('westName', t.westName);
-  ['vs1lbl','vs2lbl','vs3lbl','vs4lbl'].forEach(id=>set(id, t[id]));
-  ['vs1lbl2','vs2lbl2','vs3lbl2','vs4lbl2'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.innerHTML=t[id.replace('2','')];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if(t[k] !== undefined) el.innerHTML = t[k];
   });
-  set('vs1ko',t.vs1ko); set('vs1en',t.vs1en);
-  set('vs2ko',t.vs2ko); set('vs2en',t.vs2en);
-  set('vs3ko',t.vs3ko); set('vs3en',t.vs3en);
-  set('vs4ko',t.vs4ko); set('vs4en',t.vs4en);
-  set('featuresLabel',t.featuresLabel); set('featuresTitle',t.featuresTitle);
-  set('f1t',t.f1t); set('f1d',t.f1d);
-  set('f2t',t.f2t); set('f2d',t.f2d);
-  set('f3t',t.f3t); set('f3d',t.f3d);
-  set('f4t',t.f4t); set('f4d',t.f4d);
-  set('f5t',t.f5t); set('f5d',t.f5d);
-  set('f6t',t.f6t); set('f6d',t.f6d);
-  set('testimonialText',t.testimonialText);
-  set('testimonialSrc',t.testimonialSrc);
-  set('dlLabel',t.dlLabel); set('dlTitle',t.dlTitle);
-  set('dlSubtitle',t.dlSubtitle);
-  set('iosSub',t.iosSub); set('androidSub',t.androidSub);
-  set('scrollHint',t.scrollHint);
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.getAttribute('data-i18n-placeholder');
+    if(t[k]) el.placeholder = t[k];
+  });
 
-  // active button
-  document.querySelectorAll('.lang-btn').forEach(b=>{
+  // Globe flag
+  const found = LANGS.find(l=>l.code===lang);
+  document.getElementById('currentFlag').textContent = found ? found.flag : '🌐';
+
+  // Active in grid
+  document.querySelectorAll('.lang-opt').forEach(b => {
     b.classList.toggle('active', b.dataset.lang === lang);
   });
 
-  // scroll hint text
-  const sh = document.getElementById('scrollHint');
-  if(sh) sh.firstChild && (sh.firstChild.textContent = t.scrollHint);
+  try { localStorage.setItem('dalnara_lang', lang); } catch(e){}
 }
 
-document.querySelectorAll('.lang-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>applyLang(btn.dataset.lang));
+// ── LANG GRID ─────────────────────────────────────────────────────────────────
+function buildLangGrid() {
+  const grid = document.getElementById('langGrid');
+  LANGS.forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'lang-opt';
+    btn.dataset.lang = l.code;
+    btn.innerHTML = `<span class="lang-flag">${l.flag}</span><span class="lang-name">${l.name}</span>`;
+    btn.addEventListener('click', () => { applyLang(l.code); closeLangModal(); });
+    grid.appendChild(btn);
+  });
+}
+
+// ── MODAL CONTROLS ────────────────────────────────────────────────────────────
+const langOverlay = document.getElementById('langOverlay');
+document.getElementById('globeBtn').addEventListener('click', () => langOverlay.classList.add('open'));
+document.getElementById('langClose').addEventListener('click', () => langOverlay.classList.remove('open'));
+langOverlay.addEventListener('click', e => { if(e.target===langOverlay) langOverlay.classList.remove('open'); });
+function closeLangModal() { langOverlay.classList.remove('open'); }
+
+function openWaitlist() { document.getElementById('waitlistOverlay').classList.add('open'); }
+function closeWaitlist() { document.getElementById('waitlistOverlay').classList.remove('open'); }
+document.getElementById('waitlistOverlay').addEventListener('click', e => {
+  if(e.target===document.getElementById('waitlistOverlay')) closeWaitlist();
 });
 
-// auto-detect browser language
-const browserLang = (navigator.language||'en').slice(0,2).toLowerCase();
-const supported = ['en','ko','zh','ja','ar','fr','de','es'];
-if(supported.includes(browserLang)) {
-  applyLang(browserLang);
-} else {
-  applyLang('en');
+function submitWaitlist() {
+  const email = document.getElementById('waitlistEmail').value.trim();
+  if(!email || !email.includes('@')) return;
+  document.getElementById('waitlistForm').innerHTML = `
+    <div class="waitlist-done">
+      <div class="waitlist-done-icon">🎉</div>
+      <div class="waitlist-done-msg">You're on the list!</div>
+      <div class="waitlist-done-sub">We'll email ${email} when Android launches.</div>
+    </div>`;
 }
+
+// ── JAMO DECORATION ───────────────────────────────────────────────────────────
+const jamos = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ㅏ','ㅓ','ㅗ','ㅜ','ㅡ','ㅣ','가','나','다','한','글'];
+const bg = document.getElementById('jamoBg');
+jamos.forEach((j,i) => {
+  const el = document.createElement('div');
+  el.className = 'jamo-char';
+  const size = 40 + Math.random() * 120;
+  el.style.cssText = `
+    left:${Math.random()*95}%; top:${Math.random()*95}%;
+    font-size:${size}px;
+    --dur:${16+Math.random()*14}s;
+    --delay:${Math.random()*8}s;
+    --rot:${-8+Math.random()*16}deg;
+    --rot2:${-4+Math.random()*8}deg;
+  `;
+  el.textContent = j;
+  bg.appendChild(el);
+});
+
+// ── AUTO DETECT ───────────────────────────────────────────────────────────────
+buildLangGrid();
+const stored = (() => { try { return localStorage.getItem('dalnara_lang'); } catch(e){ return null; } })();
+let detected = stored || 'en';
+if(!stored) {
+  const bl = (navigator.language||'en').toLowerCase();
+  const map = {ko:'ko',ja:'ja','zh-tw':'zh-TW','zh-hant':'zh-TW',zh:'zh',vi:'vi',es:'es',fr:'fr',de:'de',pt:'pt',it:'it',th:'th',id:'id',ms:'ms',ar:'ar',hi:'hi',bn:'bn',tr:'tr',ru:'ru',pl:'pl',nl:'nl',sv:'sv',uk:'uk',ro:'ro',cs:'cs'};
+  detected = map[bl] || map[bl.split('-')[0]] || 'en';
+}
+applyLang(detected);
 </script>
 </body>
 </html>
