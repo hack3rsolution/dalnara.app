@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support — Dalnara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0D1B2A; --navy-mid:#162436; --gold:#C8A96E; --gold-light:#E2C99A; --moon:#F5EFE6; --sage:#7A9E8E; --blush:#C97B84; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--navy); color:var(--moon); }
+    nav { padding:20px 40px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(200,169,110,0.12); }
+    .nav-logo { font-family:'Instrument Serif',serif; font-size:22px; color:var(--gold); text-decoration:none; }
+    .back-link { color:rgba(245,239,230,0.5); text-decoration:none; font-size:14px; }
+    .back-link:hover { color:var(--gold-light); }
+    .hero { text-align:center; padding:80px 40px 64px; }
+    .label { font-size:12px; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+    h1 { font-family:'Instrument Serif',serif; font-size:48px; color:var(--moon); margin-bottom:16px; }
+    .hero-sub { font-size:17px; color:rgba(245,239,230,0.55); }
+    .content { max-width:960px; margin:0 auto; padding:0 40px 100px; }
+
+    /* Contact cards */
+    .contact-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:72px; }
+    .contact-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px; padding:32px; text-align:center;
+    }
+    .contact-card:hover { border-color:rgba(200,169,110,0.2); }
+    .contact-icon { font-size:36px; margin-bottom:16px; }
+    .contact-title { font-weight:600; font-size:16px; color:var(--moon); margin-bottom:8px; }
+    .contact-desc { font-size:14px; color:rgba(245,239,230,0.5); margin-bottom:20px; line-height:1.6; }
+    .contact-link {
+      display:inline-block; color:var(--gold); text-decoration:none;
+      font-size:14px; font-weight:600; border:1px solid rgba(200,169,110,0.3);
+      padding:10px 24px; border-radius:50px; transition:all 0.2s;
+    }
+    .contact-link:hover { background:rgba(200,169,110,0.1); }
+
+    /* FAQ */
+    h2 { font-family:'Instrument Serif',serif; font-size:32px; color:var(--moon); margin-bottom:32px; }
+    .faq-list { display:flex; flex-direction:column; gap:2px; }
+    .faq-item {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+      border-radius:12px; overflow:hidden;
+    }
+    .faq-q {
+      padding:20px 24px; font-size:15px; font-weight:500; color:var(--moon);
+      cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+      gap:16px;
+    }
+    .faq-q:hover { color:var(--gold-light); }
+    .faq-q .arrow { flex-shrink:0; transition:transform 0.2s; font-size:12px; color:var(--gold); }
+    .faq-q.open .arrow { transform:rotate(180deg); }
+    .faq-a {
+      padding:0 24px; max-height:0; overflow:hidden;
+      transition:max-height 0.3s ease, padding 0.3s;
+      font-size:14px; color:rgba(245,239,230,0.6); line-height:1.8;
+    }
+    .faq-a.open { max-height:400px; padding:0 24px 20px; }
+    .faq-a a { color:var(--gold); }
+
+    .section-gap { margin-top:64px; }
+    footer { border-top:1px solid rgba(200,169,110,0.1); padding:32px 40px; text-align:center; }
+    .footer-links { display:flex; justify-content:center; gap:28px; margin-bottom:12px; }
+    .footer-links a { color:rgba(245,239,230,0.45); font-size:13px; text-decoration:none; }
+    .footer-links a:hover { color:var(--gold-light); }
+    .footer-copy { font-size:13px; color:rgba(245,239,230,0.25); }
+    @media(max-width:768px){ .contact-grid{grid-template-columns:1fr;} nav{padding:16px 20px;} .content{padding:0 20px 80px;} }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">🌙 Dalnara</a>
+  <a href="/" class="back-link">← Back to Home</a>
+</nav>
+
+<div class="hero">
+  <div class="label">Help Center</div>
+  <h1>How can we help?</h1>
+  <p class="hero-sub">We typically respond within 24 hours.</p>
+</div>
+
+<div class="content">
+  <div class="contact-grid">
+    <div class="contact-card">
+      <div class="contact-icon">💬</div>
+      <div class="contact-title">General Support</div>
+      <div class="contact-desc">Questions about features, lessons, or your account.</div>
+      <a href="mailto:support@dalnara.app" class="contact-link">support@dalnara.app</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">🔒</div>
+      <div class="contact-title">Privacy & Data</div>
+      <div class="contact-desc">Data requests, deletion, or privacy questions.</div>
+      <a href="mailto:privacy@dalnara.app" class="contact-link">privacy@dalnara.app</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">💳</div>
+      <div class="contact-title">Billing & Subscriptions</div>
+      <div class="contact-desc">Subscription issues, refunds, or purchase problems.</div>
+      <a href="mailto:support@dalnara.app" class="contact-link">Email us</a>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-list">
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        How does L1-aware pronunciation coaching work?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Dalnara detects your native language (L1) during onboarding and customizes pronunciation feedback for your specific challenges. For example, Japanese speakers get targeted coaching on ㄹ sounds and final consonants, while English speakers focus on ㄲ/ㅃ/ㅉ tense consonants and the ㅡ vowel. This is powered by AI phoneme analysis that compares your speech to native Korean speakers.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        What's the difference between Free and Premium?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Free gives you 1 lesson per day, 3 AI conversation sessions per day, basic pronunciation feedback, and full access to Hangul Master. Premium ($9.99/month or $59.99/year) unlocks unlimited AI conversation, L1-aware pronunciation coaching, all roleplay scenarios, the AI writing coach, TOPIK mode, and advanced SRS features.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        How do I cancel my subscription?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Subscriptions are managed by the App Store or Google Play. To cancel:<br><br>
+        <strong>iOS:</strong> Settings → [your name] → Subscriptions → Dalnara → Cancel<br>
+        <strong>Android:</strong> Play Store → Profile → Payments & subscriptions → Subscriptions → Dalnara → Cancel<br><br>
+        You'll retain Premium access until the end of your billing period. We don't offer refunds for unused subscription time, but Apple and Google may do so under their refund policies.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        What are add-ons and how do they work?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Add-ons are one-time purchases that unlock specific content packs permanently. Available add-ons include: Pronunciation Clinic ($4.99), K-Drama Pack ($3.99), TOPIK Mock Exams ($6.99), Business Korean ($9.99), K-Pop Listening ($2.99), and the Starter Bundle ($14.99). Once purchased, add-on content is yours forever — even if you cancel Premium.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        I purchased Premium but the app still shows Free. What do I do?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        First, try the "Restore Purchases" button in Settings → Subscription. If that doesn't work, force-quit and restart the app. Still not resolved? Email us at <a href="mailto:support@dalnara.app">support@dalnara.app</a> with your Apple ID or Google account email and purchase receipt, and we'll fix it manually within 24 hours.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        How does the AI tutor's memory work?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Premium users get an AI tutor that maintains long-term memory of your learning progress — your weak vocabulary, pronunciation patterns, grammar struggles, and completed lessons. This means every session starts where you left off, with targeted suggestions. Your tutor memory is stored securely and can be reset from Settings if desired.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        Is my audio data stored or used for AI training?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Audio recordings made during pronunciation practice are processed in real-time for feedback and are not stored permanently unless you explicitly save a session. We do not use your personal audio data to train general AI models. See our <a href="/privacy.html">Privacy Policy</a> for full details.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        Can I use Dalnara offline?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Annual Premium subscribers get offline learning mode for downloaded lessons and flashcards. AI conversation, pronunciation analysis, and community features require an internet connection.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">
+        How do I delete my account?
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a">
+        Go to Settings → Account → Delete Account in the app. This will permanently delete your profile, learning history, and AI tutor memory within 30 days. Note: deleting your account does not automatically cancel your App Store/Google Play subscription — cancel that separately before deleting your account.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-gap">
+    <p style="font-size:14px;color:rgba(245,239,230,0.4);text-align:center">
+      Didn't find your answer? Email us at <a href="mailto:support@dalnara.app" style="color:var(--gold)">support@dalnara.app</a> — we reply within 24 hours.
+    </p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-links">
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="/support.html">Support</a>
+  </div>
+  <div class="footer-copy">© 2026 Pie Nest Inc. All rights reserved.</div>
+</footer>
+
+<script>
+function toggle(el) {
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+}
+</script>
+</body>
+</html>

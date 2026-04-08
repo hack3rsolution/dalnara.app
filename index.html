@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dalnara — Learn Korean with AI</title>
+  <meta name="description" content="Master Korean naturally with AI-powered pronunciation coaching, K-Drama scenarios, and culture-integrated learning. Built for your native language.">
+  <meta property="og:title" content="Dalnara — Learn Korean with AI">
+  <meta property="og:description" content="Master Korean naturally with AI-powered pronunciation coaching tailored to your native language.">
+  <meta property="og:url" content="https://dalnara.app">
+  <link rel="canonical" href="https://dalnara.app">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0D1B2A;
+      --navy-mid: #162436;
+      --gold: #C8A96E;
+      --gold-light: #E2C99A;
+      --moon: #F5EFE6;
+      --cream: #FAF7F2;
+      --sage: #7A9E8E;
+      --blush: #C97B84;
+      --text: #1A1A2E;
+      --text-muted: #6B7280;
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      background: var(--navy);
+      color: var(--moon);
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 20px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(13,27,42,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(200,169,110,0.12);
+    }
+    .nav-logo {
+      font-family: 'Instrument Serif', serif;
+      font-size: 22px; color: var(--gold);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-logo .moon-icon { font-size: 20px; }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      color: rgba(245,239,230,0.7); text-decoration: none;
+      font-size: 14px; font-weight: 400;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold-light); }
+    .nav-cta {
+      background: var(--gold); color: var(--navy);
+      padding: 10px 22px; border-radius: 50px;
+      text-decoration: none; font-size: 14px; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 40px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 20%, rgba(200,169,110,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(122,158,142,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 30% 30% at 20% 70%, rgba(201,123,132,0.05) 0%, transparent 50%);
+    }
+    /* Stars */
+    .stars {
+      position: absolute; inset: 0; overflow: hidden;
+    }
+    .star {
+      position: absolute; background: white; border-radius: 50%;
+      animation: twinkle var(--d, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+      opacity: 0;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; }
+      50% { opacity: var(--max-opacity, 0.6); }
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(200,169,110,0.12);
+      border: 1px solid rgba(200,169,110,0.25);
+      color: var(--gold-light);
+      padding: 8px 18px; border-radius: 50px;
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 36px;
+      position: relative;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px; background: var(--sage);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+    .hero-han {
+      font-size: clamp(72px, 12vw, 140px);
+      font-family: 'Instrument Serif', serif;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 8px;
+      position: relative;
+      filter: drop-shadow(0 0 40px rgba(200,169,110,0.3));
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-8px); }
+    }
+
+    .hero-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.2;
+      color: var(--moon);
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .hero-title em { font-style: italic; color: var(--gold-light); }
+
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      color: rgba(245,239,230,0.65);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    .hero-actions {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--gold); color: var(--navy);
+      padding: 16px 32px; border-radius: 50px;
+      text-decoration: none; font-weight: 600; font-size: 16px;
+      transition: all 0.25s;
+      box-shadow: 0 8px 30px rgba(200,169,110,0.35);
+    }
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(200,169,110,0.45); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      border: 1px solid rgba(200,169,110,0.35); color: var(--gold-light);
+      padding: 16px 32px; border-radius: 50px;
+      text-decoration: none; font-weight: 400; font-size: 16px;
+      transition: all 0.25s;
+    }
+    .btn-secondary:hover { border-color: var(--gold); background: rgba(200,169,110,0.08); }
+
+    .hero-scroll {
+      position: absolute; bottom: 36px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: rgba(245,239,230,0.35); font-size: 12px;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, rgba(200,169,110,0.5), transparent);
+      animation: scrollDown 2s ease-in-out infinite;
+    }
+    @keyframes scrollDown { 0%,100%{transform:scaleY(1);opacity:1} 50%{transform:scaleY(0.5);opacity:0.5} }
+
+    /* SECTION BASE */
+    section { padding: 100px 40px; }
+    .section-label {
+      font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--gold); font-weight: 500; margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(28px, 4vw, 44px);
+      color: var(--moon); line-height: 1.25;
+      margin-bottom: 16px;
+    }
+    .section-title em { color: var(--gold-light); font-style: italic; }
+    .section-desc {
+      font-size: 17px; color: rgba(245,239,230,0.6);
+      line-height: 1.75; max-width: 520px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* L1 SECTION */
+    .l1-section { background: var(--navy-mid); }
+    .l1-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+      align-items: center; max-width: 1100px; margin: 0 auto;
+    }
+    .l1-profiles {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .l1-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius); padding: 20px;
+      transition: all 0.3s;
+    }
+    .l1-card:hover {
+      background: rgba(200,169,110,0.08);
+      border-color: rgba(200,169,110,0.2);
+      transform: translateY(-2px);
+    }
+    .l1-flag { font-size: 28px; margin-bottom: 8px; }
+    .l1-lang { font-size: 13px; font-weight: 600; color: var(--gold-light); margin-bottom: 6px; }
+    .l1-issue { font-size: 12px; color: rgba(245,239,230,0.5); line-height: 1.5; }
+    .l1-focus {
+      display: inline-block; margin-top: 8px;
+      background: rgba(200,169,110,0.15); color: var(--gold);
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+
+    /* FEATURES */
+    .features-section { background: var(--navy); }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      max-width: 1100px; margin: 60px auto 0;
+    }
+    .feat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius); padding: 32px;
+      transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .feat-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feat-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-4px); }
+    .feat-card:hover::before { opacity: 1; }
+    .feat-icon { font-size: 36px; margin-bottom: 20px; }
+    .feat-title { font-family: 'Instrument Serif', serif; font-size: 20px; color: var(--moon); margin-bottom: 10px; }
+    .feat-desc { font-size: 14px; color: rgba(245,239,230,0.55); line-height: 1.7; }
+    .feat-tag {
+      display: inline-block; margin-top: 16px;
+      background: rgba(122,158,142,0.15); color: var(--sage);
+      padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .feat-tag.premium { background: rgba(200,169,110,0.15); color: var(--gold); }
+
+    /* PRICING */
+    .pricing-section { background: var(--navy-mid); }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      max-width: 900px; margin: 60px auto 0;
+    }
+    .price-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius); padding: 36px 28px;
+      text-align: center;
+    }
+    .price-card.featured {
+      background: rgba(200,169,110,0.08);
+      border-color: rgba(200,169,110,0.3);
+      position: relative;
+    }
+    .featured-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--gold); color: var(--navy);
+      padding: 4px 16px; border-radius: 20px; font-size: 11px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .price-tier { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+    .price-featured .price-tier { color: var(--gold); }
+    .price-amount { font-family: 'Instrument Serif', serif; font-size: 48px; color: var(--moon); line-height: 1; }
+    .price-amount span { font-family: 'Pretendard', sans-serif; font-size: 16px; color: rgba(245,239,230,0.5); }
+    .price-save { font-size: 13px; color: var(--sage); margin: 8px 0 24px; min-height: 20px; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 32px; }
+    .price-features li {
+      font-size: 14px; color: rgba(245,239,230,0.7);
+      padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .price-features li .check { color: var(--sage); flex-shrink: 0; margin-top: 2px; }
+    .price-features li .x { color: rgba(245,239,230,0.25); flex-shrink: 0; margin-top: 2px; }
+    .price-btn {
+      display: block; text-align: center;
+      background: rgba(255,255,255,0.08); color: var(--moon);
+      padding: 14px; border-radius: 50px; text-decoration: none;
+      font-size: 14px; font-weight: 600; transition: all 0.2s;
+    }
+    .price-btn:hover { background: rgba(255,255,255,0.14); }
+    .price-btn.gold {
+      background: var(--gold); color: var(--navy);
+      box-shadow: 0 4px 20px rgba(200,169,110,0.3);
+    }
+    .price-btn.gold:hover { background: var(--gold-light); }
+
+    /* ADDONS */
+    .addons-section { background: var(--navy); }
+    .addons-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      max-width: 1000px; margin: 60px auto 0;
+    }
+    .addon-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius); padding: 24px;
+      display: flex; flex-direction: column;
+      transition: all 0.3s;
+    }
+    .addon-card:hover { border-color: rgba(200,169,110,0.2); transform: translateY(-2px); }
+    .addon-icon { font-size: 32px; margin-bottom: 14px; }
+    .addon-name { font-weight: 600; font-size: 15px; color: var(--moon); margin-bottom: 6px; }
+    .addon-desc { font-size: 13px; color: rgba(245,239,230,0.5); line-height: 1.6; flex: 1; }
+    .addon-price { margin-top: 16px; font-family: 'Instrument Serif', serif; font-size: 22px; color: var(--gold); }
+
+    /* CTA */
+    .cta-section {
+      background: var(--navy-mid);
+      text-align: center; padding: 120px 40px;
+    }
+    .cta-moon { font-size: 72px; margin-bottom: 24px; animation: float 6s ease-in-out infinite; }
+    .cta-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(32px, 5vw, 52px); color: var(--moon);
+      margin-bottom: 16px; line-height: 1.2;
+    }
+    .cta-title em { color: var(--gold-light); font-style: italic; }
+    .cta-sub { font-size: 17px; color: rgba(245,239,230,0.55); margin-bottom: 48px; }
+    .cta-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+    /* FOOTER */
+    footer {
+      background: var(--navy);
+      border-top: 1px solid rgba(200,169,110,0.1);
+      padding: 48px 40px;
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 24px;
+    }
+    .footer-logo {
+      font-family: 'Instrument Serif', serif;
+      font-size: 20px; color: var(--gold);
+      text-decoration: none;
+    }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a {
+      color: rgba(245,239,230,0.45); text-decoration: none;
+      font-size: 13px; transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--gold-light); }
+    .footer-copy { font-size: 13px; color: rgba(245,239,230,0.3); }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      section { padding: 72px 24px; }
+      .l1-grid { grid-template-columns: 1fr; gap: 48px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .addons-grid { grid-template-columns: 1fr 1fr; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="moon-icon">🌙</span>
+    Dalnara
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="/support.html">Support</a>
+  </div>
+  <a href="#download" class="nav-cta">Download Free</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="stars" id="stars"></div>
+
+  <div class="hero-badge">
+    <span class="dot"></span>
+    AI-Powered Korean Learning · Now on iOS
+  </div>
+
+  <div class="hero-han">한</div>
+
+  <h1 class="hero-title">
+    Learn Korean the way<br>
+    <em>your brain already works</em>
+  </h1>
+
+  <p class="hero-sub">
+    Dalnara teaches Korean with your native language in mind —
+    custom pronunciation coaching, K-Drama scenarios, and culture
+    woven into every lesson.
+  </p>
+
+  <div class="hero-actions" id="download">
+    <a href="https://apps.apple.com/app/dalnara" class="btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      App Store
+    </a>
+    <a href="#" class="btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.19.96.08L14.72 12 3.18.16C2.86.27 2.5.5 2.5.86v22.28c0 .36.36.45.68.62zM17.54 9.18l-2.7-1.54-3.23 3.36 3.23 3.36 2.7-1.54c.77-.44.77-1.2 0-1.64zM4.14.27l10.19 10.19L17.54 9.18 4.14.27zM4.14 23.73l13.4-8.91-3.21-1.28L4.14 23.73z"/></svg>
+      Google Play <span style="font-size:12px;opacity:0.6">Coming Soon</span>
+    </a>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- L1-AWARE -->
+<section class="l1-section">
+  <div class="l1-grid">
+    <div>
+      <div class="section-label">L1-Aware Coaching</div>
+      <h2 class="section-title">Your native language<br><em>is your superpower</em></h2>
+      <p class="section-desc">
+        Most apps treat all learners the same. Dalnara knows that Japanese speakers
+        struggle with ㄹ, English speakers with ㄲ/ㅃ/ㅉ, and Chinese speakers
+        with final consonants. Your coach adapts accordingly.
+      </p>
+    </div>
+    <div class="l1-profiles">
+      <div class="l1-card">
+        <div class="l1-flag">🇯🇵</div>
+        <div class="l1-lang">Japanese</div>
+        <div class="l1-issue">ㄹ/ㅓ distinction, final consonant clusters</div>
+        <span class="l1-focus">Focus: Liquid sounds</span>
+      </div>
+      <div class="l1-card">
+        <div class="l1-flag">🇺🇸</div>
+        <div class="l1-lang">English</div>
+        <div class="l1-issue">ㄲ/ㅃ/ㅉ aspirated vs tense, ㅡ vowel</div>
+        <span class="l1-focus">Focus: Tense consonants</span>
+      </div>
+      <div class="l1-card">
+        <div class="l1-flag">🇨🇳</div>
+        <div class="l1-lang">Chinese</div>
+        <div class="l1-issue">Final consonants (받침), pitch patterns</div>
+        <span class="l1-focus">Focus: Syllable endings</span>
+      </div>
+      <div class="l1-card">
+        <div class="l1-flag">🇻🇳</div>
+        <div class="l1-lang">Vietnamese</div>
+        <div class="l1-issue">Vowel length, honorific register</div>
+        <span class="l1-focus">Focus: Register levels</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="container" style="text-align:center">
+    <div class="section-label">Everything you need</div>
+    <h2 class="section-title">Korean, the way it's <em>actually spoken</em></h2>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🎤</div>
+      <div class="feat-title">AI Pronunciation Coach</div>
+      <div class="feat-desc">Real-time phoneme analysis with native language-specific feedback. Hear exactly where your sounds differ from native speakers.</div>
+      <span class="feat-tag premium">Premium</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🎭</div>
+      <div class="feat-title">K-Drama Scenarios</div>
+      <div class="feat-desc">Practice real conversations from dramas. Learn 반말 and 존댓말 in context — not from a grammar table.</div>
+      <span class="feat-tag">Free · 3 scenarios</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <div class="feat-title">AI Tutor with Memory</div>
+      <div class="feat-desc">Your tutor remembers your weak points, your progress, and your goals. Every session picks up where you left off.</div>
+      <span class="feat-tag premium">Premium</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🃏</div>
+      <div class="feat-title">Smart SRS Flashcards</div>
+      <div class="feat-desc">Vocabulary that surfaces at exactly the right moment. Integrated with pronunciation so you learn sound and meaning together.</div>
+      <span class="feat-tag">Free</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🎵</div>
+      <div class="feat-title">K-Pop Listening</div>
+      <div class="feat-desc">Learn through lyrics with dictation mode, drill mode, and real pronunciation practice. K-Pop add-on available separately.</div>
+      <span class="feat-tag">Add-on</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📝</div>
+      <div class="feat-title">TOPIK Prep</div>
+      <div class="feat-desc">Full mock exams and weakness analysis for TOPIK I and II. Know exactly what to study next.</div>
+      <span class="feat-tag">Add-on</span>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="container" style="text-align:center">
+    <div class="section-label">Simple pricing</div>
+    <h2 class="section-title">Start free, <em>upgrade when ready</em></h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">Free</div>
+      <div class="price-amount">$0</div>
+      <div class="price-save">&nbsp;</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Hangul Master (complete)</li>
+        <li><span class="check">✓</span> 1 lesson per day</li>
+        <li><span class="check">✓</span> AI chat · 3 sessions/day</li>
+        <li><span class="check">✓</span> Basic pronunciation feedback</li>
+        <li><span class="check">✓</span> Weekly K-Expression</li>
+        <li><span class="x">✗</span> L1-aware coaching</li>
+        <li><span class="x">✗</span> Unlimited AI chat</li>
+        <li><span class="x">✗</span> TOPIK mode</li>
+      </ul>
+      <a href="#download" class="price-btn">Get started free</a>
+    </div>
+
+    <div class="price-card featured">
+      <span class="featured-badge">Most Popular</span>
+      <div class="price-tier" style="color:var(--gold)">Premium Monthly</div>
+      <div class="price-amount">$9<span>.99/mo</span></div>
+      <div class="price-save">&nbsp;</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Everything in Free</li>
+        <li><span class="check">✓</span> L1-aware AI pronunciation</li>
+        <li><span class="check">✓</span> Unlimited AI conversation</li>
+        <li><span class="check">✓</span> All roleplay scenarios</li>
+        <li><span class="check">✓</span> AI writing coach</li>
+        <li><span class="check">✓</span> Advanced SRS features</li>
+        <li><span class="check">✓</span> AI tutor memory</li>
+        <li><span class="check">✓</span> Community access</li>
+      </ul>
+      <a href="#download" class="price-btn gold">Start Premium</a>
+    </div>
+
+    <div class="price-card">
+      <div class="price-tier">Annual</div>
+      <div class="price-amount">$59<span>.99/yr</span></div>
+      <div class="price-save" style="color:var(--sage)">Save 50% · $5/month</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Everything in Premium</li>
+        <li><span class="check">✓</span> Priority community matching</li>
+        <li><span class="check">✓</span> Progress report PDF</li>
+        <li><span class="check">✓</span> Offline learning mode</li>
+        <li><span class="check">✓</span> Early access features</li>
+        <li><span class="check">✓</span> No ads (ever)</li>
+        <li>&nbsp;</li>
+        <li>&nbsp;</li>
+      </ul>
+      <a href="#download" class="price-btn">Best value</a>
+    </div>
+  </div>
+</section>
+
+<!-- ADD-ONS -->
+<section class="addons-section">
+  <div class="container" style="text-align:center">
+    <div class="section-label">Add-ons · One-time purchase</div>
+    <h2 class="section-title">Go deeper with <em>what you love</em></h2>
+    <p class="section-desc" style="margin:0 auto">Unlock specialized content packs anytime. Buy once, keep forever.</p>
+  </div>
+  <div class="addons-grid">
+    <div class="addon-card">
+      <div class="addon-icon">🎤</div>
+      <div class="addon-name">Pronunciation Clinic</div>
+      <div class="addon-desc">30-day intensive pack targeting your specific phoneme weaknesses by native language.</div>
+      <div class="addon-price">$4.99</div>
+    </div>
+    <div class="addon-card">
+      <div class="addon-icon">🎭</div>
+      <div class="addon-name">K-Drama Pack</div>
+      <div class="addon-desc">Extended K-Drama scenario library with branching dialogue and honorific guidance.</div>
+      <div class="addon-price">$3.99</div>
+    </div>
+    <div class="addon-card">
+      <div class="addon-icon">📋</div>
+      <div class="addon-name">TOPIK Mock Exams</div>
+      <div class="addon-desc">Full TOPIK I & II practice sets with weakness analysis and study plans.</div>
+      <div class="addon-price">$6.99</div>
+    </div>
+    <div class="addon-card">
+      <div class="addon-icon">💼</div>
+      <div class="addon-name">Business Korean</div>
+      <div class="addon-desc">Workplace scenarios, formal email templates, and business honorific mastery.</div>
+      <div class="addon-price">$9.99</div>
+    </div>
+    <div class="addon-card">
+      <div class="addon-icon">🎵</div>
+      <div class="addon-name">K-Pop Listening</div>
+      <div class="addon-desc">Lyric-based listening practice with dictation mode and pronunciation drills.</div>
+      <div class="addon-price">$2.99</div>
+    </div>
+    <div class="addon-card" style="border-color:rgba(200,169,110,0.25);background:rgba(200,169,110,0.06)">
+      <div class="addon-icon">✨</div>
+      <div class="addon-name">Starter Bundle</div>
+      <div class="addon-desc">Pronunciation Clinic + K-Drama Pack + K-Pop Listening — best value to start.</div>
+      <div class="addon-price" style="color:var(--gold-light)">$14.99 <span style="font-size:13px;color:rgba(245,239,230,0.4);text-decoration:line-through">$11.97</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-moon">🌙</div>
+  <h2 class="cta-title">
+    Your Korean journey<br>
+    <em>starts tonight</em>
+  </h2>
+  <p class="cta-sub">Free forever. No credit card needed. Start with Hangul in 5 minutes.</p>
+  <div class="cta-actions">
+    <a href="https://apps.apple.com/app/dalnara" class="btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      Download on App Store
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <a href="/" class="footer-logo">🌙 Dalnara</a>
+    <div class="footer-links">
+      <a href="/privacy.html">Privacy Policy</a>
+      <a href="/terms.html">Terms of Service</a>
+      <a href="/support.html">Support</a>
+    </div>
+    <div class="footer-copy">© 2026 Pie Nest Inc. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  // Generate stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    star.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --d:${2+Math.random()*4}s;
+      --delay:${Math.random()*4}s;
+      --max-opacity:${0.3+Math.random()*0.6};
+    `;
+    starsEl.appendChild(star);
+  }
+</script>
+</body>
+</html>
